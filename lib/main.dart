@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print(1);
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: 'AIzaSyBopLmS7xqMMu113JR3iOH5rViqEVTj8qA',
