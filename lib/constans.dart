@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 //colors
 const Color kPrimaryColor = Color(0xFF345FB4);
@@ -41,11 +40,6 @@ final kBottomBorderRadius = BorderRadius.only(
   Radius.circular(20),
 );
 
-final kInputTextStyle = GoogleFonts.poppins(
-    color: kTextBlackColor,
-    fontSize: 15,
-    fontWeight: FontWeight.w500
-);
 
 //validation for mobile
 const String mobilePattern = r'(^(?:[+0]9)?[0-9]{10,12}$)';

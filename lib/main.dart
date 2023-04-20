@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:lets_go/screens/FabTabs.dart';
-import 'package:lets_go/screens/Login.dart';
-import 'package:lets_go/screens/Register.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lets_go/shared_prefs.dart';
 import 'package:lets_go/constans.dart';
+// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 //bool isSigned = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print(1);
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: 'AIzaSyBopLmS7xqMMu113JR3iOH5rViqEVTj8qA',

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_go/Utils.dart';
 import 'package:lets_go/constans.dart';
 import '../shared_prefs.dart';
 import 'package:lets_go/Auth.dart';
@@ -27,8 +28,8 @@ class _LoginState extends State<Login> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            'Name of application',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            'EthA',
+            style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
           ),
           Container(
             margin: const EdgeInsets.symmetric(
@@ -119,13 +120,7 @@ class _LoginState extends State<Login> {
                             Navigator.of(context,rootNavigator: true).pop();
                           } on FirebaseAuthException catch (e) {
                             Navigator.of(context,rootNavigator: true).pop();
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                      title: Text("Oops!"),
-                                      content: Text(e.message.toString()),
-                                      backgroundColor: kSecondaryColor,
-                                    ));
+                            Utils.showDialogCustom(context: context, title: "Oops!", content: e.message.toString());
                           }
                           //SharedPrefs().isSigned = true;
                           SharedPrefs().username =
@@ -133,12 +128,7 @@ class _LoginState extends State<Login> {
                           SharedPrefs().email = eMail.text;
                         } else if (eMail.text.isEmpty ||
                             passWord.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('There are some empty fields!'),
-                              backgroundColor: Color(0xffff0000),
-                            ),
-                          );
+                          Utils.showSnackBar(context: context, text: "There are some empty fields!", color: Color(0xFFFF0000));
                         }
                       },
                       child: const Text('Login'),

@@ -51,7 +51,7 @@ class _SideMenuState extends State<SideMenu> {
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
                         child: Text(
-                          SharedPrefs().username,
+                          "lol",//SharedPrefs().username,
                           style: TextStyle(
                               fontSize: 25),
                         ),

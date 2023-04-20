@@ -2,10 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/shared_prefs.dart';
-import 'package:lets_go/Auth.dart';
+import 'package:lets_go/Utils.dart';
 
 class Register extends StatefulWidget {
-  const Register({Key? key, required Function this.changeReg}) : super(key: key);
+  const Register({Key? key, required Function this.changeReg})
+      : super(key: key);
 
   final Function changeReg;
   @override
@@ -37,8 +38,8 @@ class _RegisterState extends State<Register> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            'Name of application',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            'EthA',
+            style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
           ),
           Container(
             margin: const EdgeInsets.symmetric(
@@ -280,29 +281,33 @@ class _RegisterState extends State<Register> {
                             isPasswordCorrect &&
                             (passWord.text == passWord2.text)) {
                           //Navigator.pushNamedAndRemoveUntil(
-                            //  context, '/', (route) => false);
+                          //  context, '/', (route) => false);
                           showDialog(
                               context: context,
                               barrierDismissible: false,
                               builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ));
+                                    child: CircularProgressIndicator(),
+                                  ));
                           try {
-                            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            var userCrds = await FirebaseAuth.instance
+                                .createUserWithEmailAndPassword(
                               email: eMail.text.trim(),
                               password: passWord.text.trim(),
                             );
-                            Navigator.of(context,rootNavigator: true).pop();
+                            await userCrds.user!.updateDisplayName(userName.text.trim());
+                            print("AAAAAAAA");
+                             try{
+                              Navigator.of(context, rootNavigator: true).pop();
+                             }catch(e){
+                              print(e);
+                             }
                           } on FirebaseAuthException catch (e) {
+                            print("ERROREEE");
                             Navigator.of(context, rootNavigator: true).pop();
-                            showDialog(
+                            Utils.showDialogCustom(
                                 context: context,
-                                builder: (context) =>
-                                    AlertDialog(
-                                      title: Text("Oops!"),
-                                      content: Text(e.message.toString()),
-                                      backgroundColor: kSecondaryColor,
-                                    ));
+                                title: 'Oops!',
+                                content: e.message.toString());
                           }
                           //SharedPrefs().isSigned = true;
                           SharedPrefs().username = userName.text;
@@ -311,27 +316,20 @@ class _RegisterState extends State<Register> {
                             eMail.text.isEmpty ||
                             passWord.text.isEmpty ||
                             passWord2.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('There are some empty fields!'),
-                              backgroundColor: Color(0xffff0000),
-                            ),
-                          );
+                          Utils.showSnackBar(
+                              context: context,
+                              text: 'There are some empty fields!',
+                              color: Color(0xffff0000));
                         } else if (passWord.text != passWord2.text) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Passwords don\'t match!'),
-                              backgroundColor: Color(0xffff0000),
-                            ),
-                          );
+                          Utils.showSnackBar(
+                              context: context,
+                              text: "Passwords don\'t match!",
+                              color: Color(0xffff0000));
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Please, fulfill the requirements!'),
-                              backgroundColor: Color(0xffff0000),
-                            ),
-                          );
+                          Utils.showSnackBar(
+                              context: context,
+                              text: "Please, fulfill the requirements!",
+                              color: Color(0xffff0000));
                         }
                       },
                       child: const Text('Register'),

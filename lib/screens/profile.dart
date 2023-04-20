@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 class MyProfileScreen extends StatelessWidget {
   MyProfileScreen({Key? key}) : super(key: key);
   final user = FirebaseAuth.instance.currentUser!;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +64,7 @@ class MyProfileScreen extends StatelessWidget {
                         FittedBox(
                           fit: BoxFit.fitWidth,
                           child: Text(
-                            SharedPrefs().username,
+                            user.displayName!,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 25),
                           ),
