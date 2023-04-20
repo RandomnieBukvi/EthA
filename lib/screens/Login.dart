@@ -16,6 +16,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool isCheked = true;
+  bool isLoading = false;
 
   var eMail = TextEditingController();
   var passWord = TextEditingController();
@@ -100,38 +101,35 @@ class _LoginState extends State<Login> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
+                        setState(() {
+                          isLoading = true;
+                        });
                         print('${eMail.text} & ${passWord.text}');
                         ScaffoldMessenger.of(context).clearSnackBars();
                         if (eMail.text.isNotEmpty && passWord.text.isNotEmpty) {
-                          // Navigator.pushNamedAndRemoveUntil(
-                          //     context, '/', (route) => false);
-                          showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ));
                           try {
                             await FirebaseAuth.instance
                                 .signInWithEmailAndPassword(
                               email: eMail.text.trim(),
                               password: passWord.text.trim(),
                             );
-                            Navigator.of(context,rootNavigator: true).pop();
+                            return;
                           } on FirebaseAuthException catch (e) {
-                            Navigator.of(context,rootNavigator: true).pop();
                             Utils.showDialogCustom(context: context, title: "Oops!", content: e.message.toString());
                           }
-                          //SharedPrefs().isSigned = true;
-                          SharedPrefs().username =
-                              "Потом исправим, когда подключим к базе данных";
-                          SharedPrefs().email = eMail.text;
                         } else if (eMail.text.isEmpty ||
                             passWord.text.isEmpty) {
                           Utils.showSnackBar(context: context, text: "There are some empty fields!", color: Color(0xFFFF0000));
                         }
+                        setState(() {
+                          isLoading = false;
+                        });
                       },
-                      child: const Text('Login'),
+                      child: isLoading ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                              child: CircularProgressIndicator(
+                                  color: kTextWhiteColor)) : const Text('Login'),
                     )),
               ],
             ),

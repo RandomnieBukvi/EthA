@@ -11,6 +11,7 @@ class SideMenu extends StatefulWidget {
 }
 
 class _SideMenuState extends State<SideMenu> {
+  User user = FirebaseAuth.instance.currentUser!;
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -51,7 +52,7 @@ class _SideMenuState extends State<SideMenu> {
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
                         child: Text(
-                          "lol",//SharedPrefs().username,
+                          user.displayName!,//SharedPrefs().username,
                           style: TextStyle(
                               fontSize: 25),
                         ),

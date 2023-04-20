@@ -14,6 +14,7 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  bool isLoading = false;
   bool isCheked = true;
   bool isUsernameCorrect = true;
   bool isEmailCorrect = true;
@@ -270,6 +271,9 @@ class _RegisterState extends State<Register> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
+                        setState(() {
+                          isLoading = true;
+                        });
                         print(
                             '${userName.text} & ${passWord.text} / ${passWord2.text}');
                         ScaffoldMessenger.of(context).clearSnackBars();
@@ -280,38 +284,21 @@ class _RegisterState extends State<Register> {
                             passWord.text.isNotEmpty &&
                             isPasswordCorrect &&
                             (passWord.text == passWord2.text)) {
-                          //Navigator.pushNamedAndRemoveUntil(
-                          //  context, '/', (route) => false);
-                          showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ));
                           try {
                             var userCrds = await FirebaseAuth.instance
                                 .createUserWithEmailAndPassword(
                               email: eMail.text.trim(),
                               password: passWord.text.trim(),
                             );
-                            await userCrds.user!.updateDisplayName(userName.text.trim());
-                            print("AAAAAAAA");
-                             try{
-                              Navigator.of(context, rootNavigator: true).pop();
-                             }catch(e){
-                              print(e);
-                             }
+                            await userCrds.user!
+                                .updateDisplayName(userName.text.trim());
+                            return;
                           } on FirebaseAuthException catch (e) {
-                            print("ERROREEE");
-                            Navigator.of(context, rootNavigator: true).pop();
                             Utils.showDialogCustom(
                                 context: context,
                                 title: 'Oops!',
                                 content: e.message.toString());
                           }
-                          //SharedPrefs().isSigned = true;
-                          SharedPrefs().username = userName.text;
-                          SharedPrefs().email = eMail.text;
                         } else if (userName.text.isEmpty ||
                             eMail.text.isEmpty ||
                             passWord.text.isEmpty ||
@@ -331,8 +318,17 @@ class _RegisterState extends State<Register> {
                               text: "Please, fulfill the requirements!",
                               color: Color(0xffff0000));
                         }
+                        setState(() {
+                          isLoading = false;
+                        });
                       },
-                      child: const Text('Register'),
+                      child: isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                              child: CircularProgressIndicator(
+                                  color: kTextWhiteColor))
+                          : const Text('Register'),
                     )),
               ],
             ),
