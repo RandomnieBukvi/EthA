@@ -17,13 +17,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: SideMenu(),
-      //app bar theme for tablet
-      appBar: AppBar(
-        elevation: 0,
-        title: Text('Profile',style: TextStyle(fontSize: 30,),),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Profile'), centerTitle: true,elevation: 0,),
       body: Container(
         color: kOtherColor,
         child: Column(
@@ -36,6 +30,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   ),
               child: Container(
                 padding: EdgeInsets.all(20),
+                /*(
+                  top: MediaQuery.of(context).padding.top + 20,
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                ),*/
                 width: double.infinity,
                 height: 150,
                 decoration: BoxDecoration(
