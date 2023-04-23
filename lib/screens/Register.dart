@@ -280,14 +280,19 @@ class _RegisterState extends State<Register> {
                           var event = await ref
                               .child("usernames/${userName.text.trim()}")
                               .once();
-                          if (userName.text.isNotEmpty &&
+                          if(event.snapshot.exists){
+                            Utils.showDialogCustom(
+                                  context: context,
+                                  title: 'Oops!',
+                                  content: 'User with this username alredy exist');
+                          }
+                          else if (userName.text.isNotEmpty &&
                               isUsernameCorrect &&
                               eMail.text.isNotEmpty &&
                               isEmailCorrect &&
                               passWord.text.isNotEmpty &&
                               isPasswordCorrect &&
-                              (passWord.text == passWord2.text) &&
-                              !event.snapshot.exists) {
+                              (passWord.text == passWord2.text)) {
                             try {
                               await FirebaseAuth.instance
                                   .createUserWithEmailAndPassword(
