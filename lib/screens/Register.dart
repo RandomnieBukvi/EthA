@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/shared_prefs.dart';
 import 'package:lets_go/Utils.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key, required Function this.changeReg})
@@ -26,13 +27,11 @@ class _RegisterState extends State<Register> {
   var passWord = TextEditingController();
   var passWord2 = TextEditingController();
 
-  /*тут некоторые строки связаны с файербейс. Я их пока что закоментирую,
-  потому что это не особо правильно и файербейс пока что не подключен к проекту*/
-
-  //CollectionReference users = FirebaseFirestore.instance.collection('users');
+  var databseInstance = FirebaseDatabase.instance;
 
   @override
   Widget build(BuildContext context) {
+    var ref = databseInstance.ref();
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -271,61 +270,73 @@ class _RegisterState extends State<Register> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        print(
-                            '${userName.text} & ${passWord.text} / ${passWord2.text}');
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        if (userName.text.isNotEmpty &&
-                            isUsernameCorrect &&
-                            eMail.text.isNotEmpty &&
-                            isEmailCorrect &&
-                            passWord.text.isNotEmpty &&
-                            isPasswordCorrect &&
-                            (passWord.text == passWord2.text)) {
-                          try {
-                            var userCrds = await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                              email: eMail.text.trim(),
-                              password: passWord.text.trim(),
-                            );
-                            await userCrds.user!
-                                .updateDisplayName(userName.text.trim());
-                            return;
-                          } on FirebaseAuthException catch (e) {
-                            Utils.showDialogCustom(
+                        if (isLoading == false) {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          print(
+                              '${userName.text} & ${passWord.text} / ${passWord2.text}');
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          var event = await ref
+                              .child("usernames/${userName.text.trim()}")
+                              .once();
+                          if (userName.text.isNotEmpty &&
+                              isUsernameCorrect &&
+                              eMail.text.isNotEmpty &&
+                              isEmailCorrect &&
+                              passWord.text.isNotEmpty &&
+                              isPasswordCorrect &&
+                              (passWord.text == passWord2.text) &&
+                              !event.snapshot.exists) {
+                            try {
+                              await FirebaseAuth.instance
+                                  .createUserWithEmailAndPassword(
+                                email: eMail.text.trim(),
+                                password: passWord.text.trim(),
+                              )
+                                  .then((uC) {
+                                uC.user!
+                                    .updateDisplayName(userName.text.trim());
+                                ref
+                                    .child('usernames')
+                                    .child(userName.text.trim())
+                                    .set(uC.user!.email);
+                              });
+                              return;
+                            } on FirebaseAuthException catch (e) {
+                              Utils.showDialogCustom(
+                                  context: context,
+                                  title: 'Oops!',
+                                  content: e.message.toString());
+                            }
+                          } else if (userName.text.isEmpty ||
+                              eMail.text.isEmpty ||
+                              passWord.text.isEmpty ||
+                              passWord2.text.isEmpty) {
+                            Utils.showSnackBar(
                                 context: context,
-                                title: 'Oops!',
-                                content: e.message.toString());
+                                text: 'There are some empty fields!',
+                                color: Color(0xffff0000));
+                          } else if (passWord.text != passWord2.text) {
+                            Utils.showSnackBar(
+                                context: context,
+                                text: "Passwords don\'t match!",
+                                color: Color(0xffff0000));
+                          } else {
+                            Utils.showSnackBar(
+                                context: context,
+                                text: "Please, fulfill the requirements!",
+                                color: Color(0xffff0000));
                           }
-                        } else if (userName.text.isEmpty ||
-                            eMail.text.isEmpty ||
-                            passWord.text.isEmpty ||
-                            passWord2.text.isEmpty) {
-                          Utils.showSnackBar(
-                              context: context,
-                              text: 'There are some empty fields!',
-                              color: Color(0xffff0000));
-                        } else if (passWord.text != passWord2.text) {
-                          Utils.showSnackBar(
-                              context: context,
-                              text: "Passwords don\'t match!",
-                              color: Color(0xffff0000));
-                        } else {
-                          Utils.showSnackBar(
-                              context: context,
-                              text: "Please, fulfill the requirements!",
-                              color: Color(0xffff0000));
+                          setState(() {
+                            isLoading = false;
+                          });
                         }
-                        setState(() {
-                          isLoading = false;
-                        });
                       },
                       child: isLoading
                           ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                              height: 20,
+                              width: 20,
                               child: CircularProgressIndicator(
                                   color: kTextWhiteColor))
                           : const Text('Register'),

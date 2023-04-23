@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'EthA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: const ColorScheme(

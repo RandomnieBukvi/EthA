@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/Utils.dart';
 import 'package:lets_go/constans.dart';
-import '../shared_prefs.dart';
-import 'package:lets_go/Auth.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key, required Function this.changeReg}) : super(key: key);
@@ -20,9 +19,10 @@ class _LoginState extends State<Login> {
 
   var eMail = TextEditingController();
   var passWord = TextEditingController();
-
+  var databseInstance = FirebaseDatabase.instance;
   @override
   Widget build(BuildContext context) {
+    var ref = databseInstance.ref();
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -42,7 +42,7 @@ class _LoginState extends State<Login> {
                 TextField(
                   controller: eMail,
                   decoration: InputDecoration(
-                    label: Text('Username'),
+                    label: Text('Username or Email'),
                     floatingLabelStyle: TextStyle(fontWeight: FontWeight.bold),
                     filled: true,
                     border: OutlineInputBorder(
@@ -101,35 +101,66 @@ class _LoginState extends State<Login> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        print('${eMail.text} & ${passWord.text}');
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        if (eMail.text.isNotEmpty && passWord.text.isNotEmpty) {
-                          try {
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                              email: eMail.text.trim(),
-                              password: passWord.text.trim(),
-                            );
-                            return;
-                          } on FirebaseAuthException catch (e) {
-                            Utils.showDialogCustom(context: context, title: "Oops!", content: e.message.toString());
+                        if (isLoading == false) {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          print('${eMail.text} & ${passWord.text}');
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          if (eMail.text.isNotEmpty &&
+                              passWord.text.isNotEmpty) {
+                            String usernameOrEmail = eMail.text.trim();
+                            if (!usernameOrEmail.contains("@")) {
+                              var event = await ref
+                                  .child("usernames/${eMail.text.trim()}")
+                                  .once();
+                              if (event.snapshot.exists) {
+                                usernameOrEmail =
+                                    event.snapshot.value.toString();
+                              } else {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                Utils.showDialogCustom(
+                                    context: context,
+                                    title: "Oops!",
+                                    content:
+                                        "User with this username does not exist");
+                                return;
+                              }
+                            }
+                            try {
+                              await FirebaseAuth.instance
+                                  .signInWithEmailAndPassword(
+                                email: usernameOrEmail,
+                                password: passWord.text.trim(),
+                              );
+                              return;
+                            } on FirebaseAuthException catch (e) {
+                              Utils.showDialogCustom(
+                                  context: context,
+                                  title: "Oops!",
+                                  content: e.message.toString());
+                            }
+                          } else if (eMail.text.isEmpty ||
+                              passWord.text.isEmpty) {
+                            Utils.showSnackBar(
+                                context: context,
+                                text: "There are some empty fields!",
+                                color: Color(0xFFFF0000));
                           }
-                        } else if (eMail.text.isEmpty ||
-                            passWord.text.isEmpty) {
-                          Utils.showSnackBar(context: context, text: "There are some empty fields!", color: Color(0xFFFF0000));
+                          setState(() {
+                            isLoading = false;
+                          });
                         }
-                        setState(() {
-                          isLoading = false;
-                        });
                       },
-                      child: isLoading ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
                               child: CircularProgressIndicator(
-                                  color: kTextWhiteColor)) : const Text('Login'),
+                                  color: kTextWhiteColor))
+                          : const Text('Login'),
                     )),
               ],
             ),

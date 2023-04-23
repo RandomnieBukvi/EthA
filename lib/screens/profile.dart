@@ -4,9 +4,16 @@ import 'package:lets_go/sidemenu.dart';
 import 'package:lets_go/shared_prefs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class MyProfileScreen extends StatelessWidget {
+class MyProfileScreen extends StatefulWidget {
   MyProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MyProfileScreen> createState() => _MyProfileScreenState();
+}
+
+class _MyProfileScreenState extends State<MyProfileScreen> {
   final user = FirebaseAuth.instance.currentUser!;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +70,7 @@ class MyProfileScreen extends StatelessWidget {
                     children: [
                         FittedBox(
                           fit: BoxFit.fitWidth,
-                          child: Text(
+                          child: user.displayName == null ? CircularProgressIndicator(color: kTextBlackColor,) : Text(
                             user.displayName!,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 25),
