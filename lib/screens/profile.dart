@@ -20,69 +20,66 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       drawer: SideMenu(),
       //app bar theme for tablet
       appBar: AppBar(
-        title: Text('My Profile'),
-        actions: [
-          InkWell(
-            onTap: () {
-              //send report to school management, in case if you want some changes to your profile
-            },
-            child: Container(
-              padding: EdgeInsets.only(right: kDefaultPadding / 2),
-              child: Row(
-                children: [
-                  Icon(Icons.report_gmailerrorred_outlined),
-                  kHalfWidthSizedBox,
-                  Text(
-                    'Report',
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        elevation: 0,
+        title: Text('Profile',style: TextStyle(fontSize: 30,),),
+        centerTitle: true,
       ),
       body: Container(
         color: kOtherColor,
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: 150,
-              decoration: BoxDecoration(
-                color: kPrimaryColor,
-                borderRadius: kBottomBorderRadius,
-              ),
-              child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: kSecondaryColor,
-                  backgroundImage:
-                  AssetImage('assets/images/MAIN CHARECTER1.png'),
-                ),
-                kWidthSizedBox,
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: user.displayName == null ? CircularProgressIndicator(color: kTextBlackColor,) : Text(
-                            user.displayName!,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 25),
-                          ),
-                        ),
-                      Text('Rating:1987 | Leaderboard:4',
-                          style: Theme.of(context).textTheme.subtitle1),
-                    ],
+            Material(
+              elevation: 4,
+              borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15)
                   ),
-                )
-              ],
-            ),
+              child: Container(
+                padding: EdgeInsets.all(20),
+                width: double.infinity,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: kPrimaryColor,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15)
+                  ),
+                ),
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(color: Colors.cyan,
+                      border: Border.all(
+                        width: 3,
+                        color: kSecondaryColor
+                      ),
+                      ),
+                    
+                    child: Image.asset('assets/images/MAIN CHARECTER1.png'),
+                  ),
+                  kWidthSizedBox,
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                          FittedBox(
+                            fit: BoxFit.fitWidth,
+                            child: user.displayName == null ? CircularProgressIndicator(color: kTextBlackColor,) : Text(
+                              user.displayName!,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
+                            ),
+                          ),
+                        Text('Rating:1987 | Leaderboard:4',
+                            style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              ),
             ),
             sizedBox,
             Row(

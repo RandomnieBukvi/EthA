@@ -29,6 +29,7 @@ class _SideMenuState extends State<SideMenu> {
                         builder: (context) => FabTabs(selectedIndex: 1)));
               },
               child: DrawerHeader(
+                padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                     //bottomLeft: Radius.circular(20.0),
@@ -42,22 +43,27 @@ class _SideMenuState extends State<SideMenu> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage:
-                          AssetImage('assets/images/MAIN CHARECTER1.png'),
-                    ),
-                    kWidthSizedBox,
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.fitWidth,
-                        child: Text(
-                          user.displayName!,//SharedPrefs().username,
-                          style: TextStyle(
-                              fontSize: 25),
-                        ),
+                    Container(
+                    decoration: BoxDecoration(color: Colors.cyan,
+                      border: Border.all(
+                        width: 3,
+                        color: kSecondaryColor
+                      ),
+                      ),
+                    
+                    child: Image.asset('assets/images/MAIN CHARECTER1.png'),
+                  ),
+                  kWidthSizedBox,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: user.displayName == null ? CircularProgressIndicator(color: kTextBlackColor,) : Text(
+                        user.displayName!,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
                       ),
                     ),
+                  )
                   ],
                 ),
               ),

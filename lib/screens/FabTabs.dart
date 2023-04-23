@@ -70,17 +70,6 @@ class _FabTabsState extends State<FabTabs> {
         child: currentScreen,
         bucket: bucket,
       ),
-      floatingActionButton: FloatingActionButton(
-        //backgroundColor: Colors.purple,
-        child: Icon(Icons.play_arrow_sharp),
-        onPressed: () {
-          setState(() {
-            currentScreen = Play();
-            currentIndex = 5;
-          });
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 10,

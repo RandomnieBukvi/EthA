@@ -29,15 +29,15 @@ const kHalfWidthSizedBox = SizedBox(
 );
 
 final kTopBorderRadius = BorderRadius.only(
-  topLeft: Radius.circular(20),
+  topLeft: Radius.circular(15),
   topRight:
-  Radius.circular(20),
+  Radius.circular(15),
 );
 
 final kBottomBorderRadius = BorderRadius.only(
-  bottomRight: Radius.circular(20),
+  bottomRight: Radius.circular(15),
   bottomLeft:
-  Radius.circular(20),
+  Radius.circular(15),
 );
 
 
