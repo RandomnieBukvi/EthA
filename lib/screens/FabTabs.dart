@@ -47,7 +47,6 @@ class _FabTabsState extends State<FabTabs> {
   final List<Widget> pages = [GameMap(), Weapons(), Inventory()];
 
   final PageStorageBucket bucket = PageStorageBucket();
-
   @override
   Widget build(BuildContext context) {
     Widget currentScreen = pages[currentIndex];
@@ -62,8 +61,9 @@ class _FabTabsState extends State<FabTabs> {
       ),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
+          labelTextStyle: MaterialStateProperty.resolveWith((states) => TextStyle(color: Colors.white70)),
           backgroundColor: kPrimaryColor,
-          indicatorColor: Colors.white70,
+          indicatorColor: Color.fromRGBO(255, 255, 255, 0.702),
           ),
         child: NavigationBar(
           selectedIndex: currentIndex,
@@ -73,11 +73,11 @@ class _FabTabsState extends State<FabTabs> {
             });
           },
           destinations: [
-            NavigationDestination(icon: Icon(Icons.map_outlined,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.map_outlined, color: Colors.black,),label: 'Map'),
+            NavigationDestination(icon: Icon(Icons.map_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.map_sharp, color: Colors.black,),label: 'Map'),
             NavigationDestination(
-                icon: Icon(Icons.calculate,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calculate,color: Colors.black,), label: 'Weapons'),
+                icon: Icon(Icons.calculate_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calculate_sharp,color: Colors.black,), label: 'Weapons'),
             NavigationDestination(
-                icon: Icon(Icons.inventory_2_outlined,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.inventory_2_outlined,color: Colors.black,), label: 'Inventory'),
+                icon: Icon(Icons.calendar_view_month_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calendar_view_month_sharp,color: Colors.black,), label: 'Inventory'),
           ],
         ),
       ),

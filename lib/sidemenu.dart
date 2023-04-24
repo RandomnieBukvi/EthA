@@ -25,8 +25,7 @@ class _SideMenuState extends State<SideMenu> {
           SizedBox(
             height: 150,
             child: GestureDetector(
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyProfileScreen())),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyProfileScreen())),
               child: Container(
                 padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top + 20,

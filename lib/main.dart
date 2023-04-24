@@ -46,6 +46,7 @@ class MyApp extends StatelessWidget {
       title: 'EthA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: "Monocraft",
         colorScheme: const ColorScheme(
             brightness: Brightness.light,
             primary: kPrimaryColor,
