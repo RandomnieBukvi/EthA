@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lets_go/screens/quiz/home.dart';
-import 'package:lets_go/screens/more.dart';
+import 'package:lets_go/constans.dart';
+import 'package:lets_go/screens/inventory.dart';
+import 'package:lets_go/screens/map.dart';
 import 'package:lets_go/screens/profile.dart';
-import 'package:lets_go/screens/team.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_go/screens/Play.dart';
 import 'package:lets_go/Auth.dart';
+import 'package:lets_go/screens/weapons.dart';
+import 'package:lets_go/sidemenu.dart';
 
 class Fabs extends StatelessWidget {
   Fabs({Key? key}) : super(key: key);
@@ -36,166 +37,48 @@ class FabTabs extends StatefulWidget {
 class _FabTabsState extends State<FabTabs> {
   int currentIndex = 0;
 
-  void onItemTapped(int index) {
-    setState(() {
-      widget.selectedIndex = index;
-      currentIndex = widget.selectedIndex;
-    });
-  }
-
   @override
   void initState() {
-    onItemTapped(widget.selectedIndex);
+    currentIndex = widget.selectedIndex;
     // TODO: implement initState
     super.initState();
   }
 
-  final List<Widget> pages = [Home(), MyProfileScreen(), Team(), More()];
+  final List<Widget> pages = [GameMap(), Weapons(), Inventory()];
 
   final PageStorageBucket bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
-    Widget currentScreen = currentIndex == 0
-        ? Home()
-        : currentIndex == 1
-            ? MyProfileScreen()
-            : currentIndex == 2
-                ? Team()
-                : currentIndex == 3
-                    ? More()
-                    : Play();
+    Widget currentScreen = pages[currentIndex];
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+      ),
+      drawer: SideMenu(),
       body: PageStorage(
         child: currentScreen,
         bucket: bucket,
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 10,
-        child: Container(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MaterialButton(
-                    minWidth: 50,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = Home();
-                        currentIndex = 0;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.home_filled,
-                          color: currentIndex == 0
-                              ? Colors.pinkAccent
-                              : Colors.grey,
-                        ),
-                        Text(
-                          "Home",
-                          style: TextStyle(
-                              color: currentIndex == 0
-                                  ? Colors.pinkAccent
-                                  : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 50,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = MyProfileScreen();
-                        currentIndex = 1;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.person,
-                          color: currentIndex == 1
-                              ? Colors.blueAccent
-                              : Colors.grey,
-                        ),
-                        Text(
-                          "Profile",
-                          style: TextStyle(
-                              color: currentIndex == 1
-                                  ? Colors.blueAccent
-                                  : Colors.grey),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MaterialButton(
-                    minWidth: 50,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = Team();
-                        currentIndex = 2;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.person_pin_outlined,
-                          color: currentIndex == 2 ? Colors.blue : Colors.grey,
-                        ),
-                        Text(
-                          "Team",
-                          style: TextStyle(
-                              color: currentIndex == 2
-                                  ? Colors.blue
-                                  : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 50,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = More();
-                        currentIndex = 3;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.more_horiz_outlined,
-                          color: currentIndex == 3
-                              ? Colors.orangeAccent
-                              : Colors.grey,
-                        ),
-                        Text(
-                          "More",
-                          style: TextStyle(
-                              color: currentIndex == 3
-                                  ? Colors.orangeAccent
-                                  : Colors.grey),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              )
-            ],
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: kPrimaryColor,
+          indicatorColor: Colors.white70,
           ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+          destinations: [
+            NavigationDestination(icon: Icon(Icons.map_outlined,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.map_outlined, color: Colors.black,),label: 'Map'),
+            NavigationDestination(
+                icon: Icon(Icons.calculate,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calculate,color: Colors.black,), label: 'Weapons'),
+            NavigationDestination(
+                icon: Icon(Icons.inventory_2_outlined,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.inventory_2_outlined,color: Colors.black,), label: 'Inventory'),
+          ],
         ),
       ),
     );
