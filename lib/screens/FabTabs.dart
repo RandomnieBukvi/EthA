@@ -55,10 +55,7 @@ class _FabTabsState extends State<FabTabs> {
         elevation: 0,
       ),
       drawer: SideMenu(),
-      body: PageStorage(
-        child: currentScreen,
-        bucket: bucket,
-      ),
+      body: currentScreen,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           labelTextStyle: MaterialStateProperty.resolveWith((states) => TextStyle(color: Colors.white70)),
