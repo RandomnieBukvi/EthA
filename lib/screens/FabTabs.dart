@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/screens/inventory.dart';
 import 'package:lets_go/screens/map.dart';
@@ -17,7 +18,7 @@ class Fabs extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return FabTabs(selectedIndex: 0);
+            return FabTabs();
           } else {
             return Auth();
           }
@@ -26,9 +27,7 @@ class Fabs extends StatelessWidget {
 }
 
 class FabTabs extends StatefulWidget {
-  int selectedIndex = 0;
-
-  FabTabs({required this.selectedIndex});
+  const FabTabs({super.key});
 
   @override
   State<FabTabs> createState() => _FabTabsState();
@@ -36,32 +35,46 @@ class FabTabs extends StatefulWidget {
 
 class _FabTabsState extends State<FabTabs> {
   int currentIndex = 0;
-
+  int experience = 0;
+  int cash = 0;
+  DatabaseReference userDataRef = FirebaseDatabase.instance.ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+  late Stream<DatabaseEvent> userDataChange = userDataRef.onValue;
   @override
   void initState() {
-    currentIndex = widget.selectedIndex;
+    currentIndex = 0;
+    userDataChange.listen((event) { 
+      var data = event.snapshot;
+      setState(() {
+        experience = int.parse(data.child('experience').value.toString());
+        cash = int.parse(data.child('cash').value.toString());
+      });
+    });
     // TODO: implement initState
     super.initState();
   }
-
+  
   final List<Widget> pages = [GameMap(), Weapons(), Inventory()];
 
-  final PageStorageBucket bucket = PageStorageBucket();
   @override
   Widget build(BuildContext context) {
     Widget currentScreen = pages[currentIndex];
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-      ),
+      appBar: AppBar(elevation: 0, title: Row(children: [
+        Icon(Icons.attach_money_sharp),
+        Text(cash.toString()),
+        SizedBox(width: 20,),
+        Icon(Icons.star),
+        Text(experience.toString()),
+      ],)),
       drawer: SideMenu(),
       body: currentScreen,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          labelTextStyle: MaterialStateProperty.resolveWith((states) => TextStyle(color: Colors.white70)),
+          labelTextStyle: MaterialStateProperty.resolveWith(
+              (states) => TextStyle(color: Colors.white70)),
           backgroundColor: kPrimaryColor,
           indicatorColor: Color.fromRGBO(255, 255, 255, 0.702),
-          ),
+        ),
         child: NavigationBar(
           selectedIndex: currentIndex,
           onDestinationSelected: (index) {
@@ -70,11 +83,36 @@ class _FabTabsState extends State<FabTabs> {
             });
           },
           destinations: [
-            NavigationDestination(icon: Icon(Icons.map_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.map_sharp, color: Colors.black,),label: 'Map'),
             NavigationDestination(
-                icon: Icon(Icons.calculate_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calculate_sharp,color: Colors.black,), label: 'Weapons'),
+                icon: Icon(
+                  Icons.map_sharp,
+                  color: Color.fromARGB(230, 255, 255, 255),
+                ),
+                selectedIcon: Icon(
+                  Icons.map_sharp,
+                  color: Colors.black,
+                ),
+                label: 'Map'),
             NavigationDestination(
-                icon: Icon(Icons.calendar_view_month_sharp,color: Color.fromARGB(230, 255, 255, 255),), selectedIcon: Icon(Icons.calendar_view_month_sharp,color: Colors.black,), label: 'Inventory'),
+                icon: Icon(
+                  Icons.calculate_sharp,
+                  color: Color.fromARGB(230, 255, 255, 255),
+                ),
+                selectedIcon: Icon(
+                  Icons.calculate_sharp,
+                  color: Colors.black,
+                ),
+                label: 'Weapons'),
+            NavigationDestination(
+                icon: Icon(
+                  Icons.calendar_view_month_sharp,
+                  color: Color.fromARGB(230, 255, 255, 255),
+                ),
+                selectedIcon: Icon(
+                  Icons.calendar_view_month_sharp,
+                  color: Colors.black,
+                ),
+                label: 'Inventory'),
           ],
         ),
       ),

@@ -280,13 +280,13 @@ class _RegisterState extends State<Register> {
                           var event = await ref
                               .child("usernames/${userName.text.trim()}")
                               .once();
-                          if(event.snapshot.exists){
+                          if (event.snapshot.exists) {
                             Utils.showDialogCustom(
-                                  context: context,
-                                  title: 'Oops!',
-                                  content: 'User with this username alredy exist');
-                          }
-                          else if (userName.text.isNotEmpty &&
+                                context: context,
+                                title: 'Oops!',
+                                content:
+                                    'User with this username alredy exist');
+                          } else if (userName.text.isNotEmpty &&
                               isUsernameCorrect &&
                               eMail.text.isNotEmpty &&
                               isEmailCorrect &&
@@ -306,6 +306,22 @@ class _RegisterState extends State<Register> {
                                     .child('usernames')
                                     .child(userName.text.trim())
                                     .set(uC.user!.email);
+                                ref
+                                    .child('usersData')
+                                    .child(userName.text.trim())
+                                    .set({
+                                  'experience' : 0,
+                                  'level' : 1,
+                                  'cash' : 0,
+                                  'inventory' : {
+                                    '1' : {
+                                      'level' : 0
+                                    },
+                                    '2' : {
+                                      'level' : 0
+                                    }
+                                  }
+                                });
                               });
                               return;
                             } on FirebaseAuthException catch (e) {
