@@ -9,7 +9,8 @@ double weaponActionsPositon = 0;
 String weaponTxt = weapons[0].name;
 String weaponDesc = weapons[0].description;
 int itemIndex = 0;
-DatabaseReference userDataRef = FirebaseDatabase.instance.ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+DatabaseReference userDataRef = FirebaseDatabase.instance
+    .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
 bool isWeaponNotAquired = false;
 
 class Weapons extends StatefulWidget {
@@ -37,80 +38,91 @@ class _WeaponsState extends State<Weapons> {
       children: [
         Flexible(
           flex: 2,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Stack(
-                alignment: AlignmentDirectional.center,
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.width / 2,
-                    child: PageView.builder(
-                        onPageChanged: (value) async {
-                          itemIndex = value;
-                          setState(() {
-                            weaponActionsPositon =
-                                -MediaQuery.of(context).size.height;
-                          });
-                          await Future.delayed(Duration(milliseconds: 150))
-                              .then((_) {
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+              filterQuality: FilterQuality.none,
+              fit: BoxFit.contain,
+              image: AssetImage('assets/images/standImage.png'),
+            )),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Stack(
+                  alignment: AlignmentDirectional.center,
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.width / 2,
+                      child: PageView.builder(
+                          onPageChanged: (value) async {
+                            itemIndex = value;
                             setState(() {
-                              weaponTxt = weapons[value].name;
-                              weaponDesc = weapons[value].description;
-                              isWeaponNotAquired = !inventory.containsKey(itemIndex.toString());
+                              weaponActionsPositon =
+                                  -MediaQuery.of(context).size.height;
                             });
-                          });
-                          setState(() {
-                            weaponActionsPositon = 0;
-                          });
-                        },
-                        controller: scrollCTRL,
-                        itemCount: weapons.length,
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (context, index) => WeaponBox(index)),
-                  ),
-                  Positioned(
-                    //bottom: 50,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 100,
-                          width: 50,
-                          child: IconButton(
-                            onPressed: () {
-                              scrollCTRL.previousPage(
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.decelerate);
-                            },
-                            icon: Icon(
-                              Icons.arrow_back_ios_new_sharp,
-                              size: 50,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 100,
-                          width: 50,
-                          child: IconButton(
-                            onPressed: () {
-                              scrollCTRL.nextPage(
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.decelerate);
-                            },
-                            icon: Icon(
-                              Icons.arrow_forward_ios_sharp,
-                              size: 50,
-                            ),
-                          ),
-                        ),
-                      ],
+                            await Future.delayed(Duration(milliseconds: 150))
+                                .then((_) {
+                              setState(() {
+                                weaponTxt = weapons[value].name;
+                                weaponDesc = weapons[value].description;
+                                isWeaponNotAquired = !inventory
+                                    .containsKey(itemIndex.toString());
+                              });
+                            });
+                            setState(() {
+                              weaponActionsPositon = 0;
+                            });
+                          },
+                          controller: scrollCTRL,
+                          itemCount: weapons.length,
+                          physics: BouncingScrollPhysics(),
+                          itemBuilder: (context, index) => WeaponBox(index)),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Positioned(
+                      //bottom: 50,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 100,
+                            width: 50,
+                            child: IconButton(
+                              onPressed: () {
+                                scrollCTRL.previousPage(
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.decelerate);
+                              },
+                              icon: Icon(
+                                Icons.arrow_back_ios_new_sharp,
+                                size: 50,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 100,
+                            width: 50,
+                            child: IconButton(
+                              onPressed: () {
+                                scrollCTRL.nextPage(
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.decelerate);
+                              },
+                              icon: Icon(
+                                Icons.arrow_forward_ios_sharp,
+                                size: 50,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         Flexible(flex: 3, child: WeaponActions()),
@@ -134,7 +146,7 @@ class WeaponBox extends StatelessWidget {
           decoration: BoxDecoration(
               color: kSecondaryColor,
               borderRadius: BorderRadius.all(Radius.circular(15))),
-          child: Image.asset(weapons[index].imagePath),
+          child: Text(weapons[index].imagePath),
         ),
       ),
     );
@@ -184,16 +196,27 @@ class _WeaponActionsState extends State<WeaponActions> {
                     color: kPrimaryColor,
                   ),
                   isWeaponNotAquired
-                      ? ElevatedButton(onPressed: () async {
-                        var event = await userDataRef.once();
-                        if(int.parse(event.snapshot.child('cash').value.toString()) < weapons[itemIndex].cost){
-                          print("LOL YOU GOT NO MONEY");
-                        }
-                        else{
-                          userDataRef.child('inventory/${itemIndex.toString()}').set({'level' : 1});
-                          userDataRef.child('cash').set(int.parse(event.snapshot.child('cash').value.toString()) - weapons[itemIndex].cost);
-                        }
-                      }, child: Text(weapons[itemIndex].cost.toString())) : Container(),
+                      ? ElevatedButton(
+                          onPressed: () async {
+                            var event = await userDataRef.get();
+                            if (int.parse(
+                                    event.child('cash').value.toString()) <
+                                weapons[itemIndex].cost) {
+                              print("LOL YOU GOT NO MONEY");
+                            } else {
+                              userDataRef
+                                  .child('inventory/${itemIndex.toString()}')
+                                  .set({'level': 1});
+                              userDataRef.child('cash').set(int.parse(
+                                      event.child('cash').value.toString()) -
+                                  weapons[itemIndex].cost);
+                              setState(() {
+                                isWeaponNotAquired = false;
+                              });
+                            }
+                          },
+                          child: Text(weapons[itemIndex].cost.toString()))
+                      : Container(),
                 ],
               ),
             ),
