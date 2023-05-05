@@ -1,10 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/all_weapons.dart';
+import 'package:lets_go/screens/inventory.dart';
 
 double weaponActionsPositon = 0;
 String weaponTxt = weapons[0].name;
 String weaponDesc = weapons[0].description;
+int itemIndex = 0;
+DatabaseReference userDataRef = FirebaseDatabase.instance.ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+bool isWeaponNotAquired = false;
 
 class Weapons extends StatefulWidget {
   Weapons({super.key});
@@ -15,11 +21,12 @@ class Weapons extends StatefulWidget {
 
 class _WeaponsState extends State<Weapons> {
   var scrollCTRL = PageController(viewportFraction: 0.5);
-
   @override
   void initState() {
     weaponTxt = weapons[0].name;
     weaponDesc = weapons[0].description;
+    itemIndex = 0;
+    isWeaponNotAquired = !inventory.containsKey(itemIndex.toString());
     // TODO: implement initState
     super.initState();
   }
@@ -40,22 +47,17 @@ class _WeaponsState extends State<Weapons> {
                     height: MediaQuery.of(context).size.width / 2,
                     child: PageView.builder(
                         onPageChanged: (value) async {
-                          /*setState(() async {
-                            weaponActionsPositon = -400;
-                            await Future.delayed(Duration(milliseconds: 150)).then((value){
-                              weaponTxt = weapons[value].name;
-                            weaponDesc = weapons[value].description;
-                            });
-                            weaponActionsPositon = 0;
-                          });*/
+                          itemIndex = value;
                           setState(() {
-                            weaponActionsPositon = -400;
+                            weaponActionsPositon =
+                                -MediaQuery.of(context).size.height;
                           });
                           await Future.delayed(Duration(milliseconds: 150))
                               .then((_) {
                             setState(() {
                               weaponTxt = weapons[value].name;
                               weaponDesc = weapons[value].description;
+                              isWeaponNotAquired = !inventory.containsKey(itemIndex.toString());
                             });
                           });
                           setState(() {
@@ -176,14 +178,22 @@ class _WeaponActionsState extends State<WeaponActions> {
                     weaponTxt,
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 50),
-                    child: Divider(
-                      thickness: 1,
-                      color: kPrimaryColor,
-                    ),
-                  ),
                   Text(weaponDesc, style: TextStyle(fontSize: 20)),
+                  Divider(
+                    thickness: 1,
+                    color: kPrimaryColor,
+                  ),
+                  isWeaponNotAquired
+                      ? ElevatedButton(onPressed: () async {
+                        var event = await userDataRef.once();
+                        if(int.parse(event.snapshot.child('cash').value.toString()) < weapons[itemIndex].cost){
+                          print("LOL YOU GOT NO MONEY");
+                        }
+                        else{
+                          userDataRef.child('inventory/${itemIndex.toString()}').set({'level' : 1});
+                          userDataRef.child('cash').set(int.parse(event.snapshot.child('cash').value.toString()) - weapons[itemIndex].cost);
+                        }
+                      }, child: Text(weapons[itemIndex].cost.toString())) : Container(),
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_go/UserData.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/shared_prefs.dart';
 import 'package:lets_go/Utils.dart';
@@ -14,6 +15,8 @@ class Register extends StatefulWidget {
   State<Register> createState() => _RegisterState();
 }
 
+var ref = FirebaseDatabase.instance.ref();
+
 class _RegisterState extends State<Register> {
   bool isLoading = false;
   bool isCheked = true;
@@ -27,11 +30,8 @@ class _RegisterState extends State<Register> {
   var passWord = TextEditingController();
   var passWord2 = TextEditingController();
 
-  var databseInstance = FirebaseDatabase.instance;
-
   @override
   Widget build(BuildContext context) {
-    var ref = databseInstance.ref();
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -293,36 +293,15 @@ class _RegisterState extends State<Register> {
                               passWord.text.isNotEmpty &&
                               isPasswordCorrect &&
                               (passWord.text == passWord2.text)) {
+                            username = userName.text.trim();
+                            email = eMail.text.trim();
+                            //MyUser.name = username;
                             try {
-                              await FirebaseAuth.instance
+                              FirebaseAuth.instance
                                   .createUserWithEmailAndPassword(
                                 email: eMail.text.trim(),
                                 password: passWord.text.trim(),
-                              )
-                                  .then((uC) {
-                                uC.user!
-                                    .updateDisplayName(userName.text.trim());
-                                ref
-                                    .child('usernames')
-                                    .child(userName.text.trim())
-                                    .set(uC.user!.email);
-                                ref
-                                    .child('usersData')
-                                    .child(userName.text.trim())
-                                    .set({
-                                  'experience' : 0,
-                                  'level' : 1,
-                                  'cash' : 0,
-                                  'inventory' : {
-                                    '1' : {
-                                      'level' : 0
-                                    },
-                                    '2' : {
-                                      'level' : 0
-                                    }
-                                  }
-                                });
-                              });
+                              );
                               return;
                             } on FirebaseAuthException catch (e) {
                               Utils.showDialogCustom(
@@ -406,11 +385,22 @@ class _RegisterState extends State<Register> {
     userName.dispose();
     super.dispose();
   }
+}
 
-  Future register() async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: eMail.text.trim(),
-      password: passWord.text.trim(),
-    );
-  }
+String username = "";
+String email = "";
+
+Future<void> setDataOnRegister() async {
+  print("SETTING DATA AFTER REGITER");
+  await FirebaseAuth.instance.currentUser!.updateDisplayName(username);
+  await ref.child('usernames').child(username).set(email);
+  await ref.child('usersData').child(username).set({
+    'experience': 0,
+    'level': 1,
+    'cash': 0,
+    'inventory': {
+      '0': {'level': 1},
+      '1': {'level': 1}
+    }
+  });
 }

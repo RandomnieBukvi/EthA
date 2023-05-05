@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lets_go/screens/FabTabs.dart';
-import 'package:lets_go/shared_prefs.dart';
 import 'package:lets_go/constans.dart';
-// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 
-//bool isSigned = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,22 +14,11 @@ void main() async {
         messagingSenderId: '929569094769',
         projectId: 'tensaiproject-2e8cc'),
   );
-  //final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  /*if (prefs.containsKey('isSigned') == false) {
-    prefs.setBool('isSigned', false);
-  }*/
-
-  //isSigned = prefs.getBool('isSigned')!;
-
   print("started");
-  SharedPrefs().init();
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
-
   runApp(MyApp());
 }
 
@@ -60,12 +46,7 @@ class MyApp extends StatelessWidget {
             surface: kTextLightColor,
             onSurface: kTextBlackColor),
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => Fabs(),
-        /*'/register': (context) => Register(),
-        '/login': (context) => Login(),*/
-      },
+      home: Fabs(),
     );
   }
 }

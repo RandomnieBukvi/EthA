@@ -1,13 +1,34 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:lets_go/UserData.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/screens/inventory.dart';
 import 'package:lets_go/screens/map.dart';
-import 'package:lets_go/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/Auth.dart';
 import 'package:lets_go/screens/weapons.dart';
 import 'package:lets_go/sidemenu.dart';
+
+import '../all_weapons.dart';
+import 'Register.dart';
+
+late DataSnapshot userDataOnceOutside;
+
+void initVariables() {
+  //установка начальных значений для переменных
+  double weaponActionsPositon = 0;
+  weaponTxt = weapons[0].name;
+  weaponDesc = weapons[0].description;
+  itemIndex = 0;
+  userDataRef = FirebaseDatabase.instance
+      .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+  isWeaponNotAquired = false;
+  inventory = {};
+  inventoryDataRef = userDataRef.child('inventory');
+  items = [];
+}
 
 class Fabs extends StatelessWidget {
   Fabs({Key? key}) : super(key: key);
@@ -17,8 +38,40 @@ class Fabs extends StatelessWidget {
     return StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
+          print("AUTH STATE CHANGES");
           if (snapshot.hasData) {
-            return FabTabs();
+            if (snapshot.data!.displayName == null) {
+              print("NO NAME");
+              return FutureBuilder(
+                  future: setDataOnRegister(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      print("GOT NAME");
+                      initVariables();
+                      return FabTabs();
+                    } else {
+                      return Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                  });
+            } else {
+              return FutureBuilder(
+                  future: loadData(),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                      userDataOnceOutside = snapshot.data!;
+                    print("HAVE NAME");
+                    initVariables();
+                    return FabTabs();
+                    }
+                    else{
+                      return Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                  });
+            }
           } else {
             return Auth();
           }
@@ -37,35 +90,60 @@ class _FabTabsState extends State<FabTabs> {
   int currentIndex = 0;
   int experience = 0;
   int cash = 0;
-  DatabaseReference userDataRef = FirebaseDatabase.instance.ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
-  late Stream<DatabaseEvent> userDataChange = userDataRef.onValue;
+  late DatabaseReference userDataRef;
+  late StreamSubscription<DatabaseEvent> userDataChange;
   @override
   void initState() {
+    userDataRef = FirebaseDatabase.instance
+      .ref().child('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+    initInventory();
     currentIndex = 0;
-    userDataChange.listen((event) { 
+    experience =
+        int.parse(userDataOnceOutside.child('experience').value.toString());
+    cash = int.parse(userDataOnceOutside.child('cash').value.toString());
+    userDataChange = userDataRef.onValue.listen((event) async {
       var data = event.snapshot;
-      setState(() {
-        experience = int.parse(data.child('experience').value.toString());
-        cash = int.parse(data.child('cash').value.toString());
+      //var data = userDataRef.child(');
+      var exp = data.child('experience').value.toString();
+      var c = data.child('cash').value.toString();
+      if(exp != null && c != null){
+        setState(() {
+        experience = int.parse(exp);
+        cash = int.parse(c);
       });
+      }
     });
     // TODO: implement initState
     super.initState();
   }
-  
+
+  @override
+  void dispose() {
+    userDataChange.cancel();
+    inventoryChange.cancel();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   final List<Widget> pages = [GameMap(), Weapons(), Inventory()];
 
   @override
   Widget build(BuildContext context) {
     Widget currentScreen = pages[currentIndex];
     return Scaffold(
-      appBar: AppBar(elevation: 0, title: Row(children: [
-        Icon(Icons.attach_money_sharp),
-        Text(cash.toString()),
-        SizedBox(width: 20,),
-        Icon(Icons.star),
-        Text(experience.toString()),
-      ],)),
+      appBar: AppBar(
+          elevation: 0,
+          title: Row(
+            children: [
+              Icon(Icons.attach_money_sharp),
+              Text(cash.toString()),
+              SizedBox(
+                width: 20,
+              ),
+              Icon(Icons.star),
+              Text(experience.toString()),
+            ],
+          )),
       drawer: SideMenu(),
       body: currentScreen,
       bottomNavigationBar: NavigationBarTheme(
@@ -118,4 +196,11 @@ class _FabTabsState extends State<FabTabs> {
       ),
     );
   }
+}
+
+Future<DataSnapshot> loadData() async {
+  var data = await FirebaseDatabase.instance
+      .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}')
+      .get();
+  return data;
 }

@@ -89,11 +89,9 @@ class _SideMenuState extends State<SideMenu> {
                         builder: (context) => LeaderBoard()))),
                 ListTile(
                   leading: Icon(Icons.logout),
-                  title: Text("Sign out"),
+                  title: Text("Log out"),
                   onTap: () {
                     FirebaseAuth.instance.signOut();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/', (route) => false);
                   },
                 )
               ],

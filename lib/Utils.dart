@@ -40,6 +40,7 @@ class Utils {
                     title,
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
