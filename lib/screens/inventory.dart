@@ -12,19 +12,30 @@ DatabaseReference inventoryDataRef = FirebaseDatabase.instance.ref(
 
 late StreamSubscription<DatabaseEvent> inventoryChange;
 void initInventory() async {
-  inventoryChange = inventoryDataRef.onValue.listen((event) async {
+  inventoryChange = inventoryDataRef.onValue.listen((event) {
     book = {};
+    notepad = {};
     event.snapshot.child('book').children.forEach((element) {
-      print(element.key);
       book.addAll({element.key: element.value});
     });
-    notepad = {};
+    Map bufer = Map();
+    weapons.keys.forEach((wKey) {
+      if (book[wKey] != null) {
+        bufer.addAll({wKey: book[wKey]});
+      }
+    });
+    book = bufer;
+
     event.snapshot.child('notepad').children.forEach((element) {
       notepad.addAll({element.key: element.value});
     });
-    print('book: $book & notepad: $notepad');
-    bookItems = [];
-    notepadItems = [];
+    bufer = {};
+    weapons.keys.forEach((wKey) {
+      if (notepad[wKey] != null) {
+        bufer.addAll({wKey: notepad[wKey]});
+      }
+    });
+    notepad = bufer;
   });
 }
 
@@ -39,19 +50,25 @@ class Inventory extends StatefulWidget {
 }
 
 class InventoryState extends State<Inventory> {
-  /* @override
+  @override
   void initState() {
-    bookItems.clear();
+    bookItems = [];
     book.forEach((key, value) {
-      bookItems.add(Text(weapons[int.parse(key)].name, style: TextStyle(fontSize: 50),));
+      bookItems.add(Text(
+        weapons[key]!.imagePath,
+        style: TextStyle(fontSize: 50),
+      ));
     });
-    notepadItems.clear();
+    notepadItems = [];
     notepad.forEach((key, value) {
-      notepadItems.add(Text(weapons[int.parse(key)].name, style: TextStyle(fontSize: 50),));
+      notepadItems.add(Text(
+        weapons[key]!.imagePath,
+        style: TextStyle(fontSize: 50),
+      ));
     });
     // TODO: implement initState
     super.initState();
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +76,7 @@ class InventoryState extends State<Inventory> {
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
-        children: [Text('lol')],
+        children: bookItems,
       ),
     );
   }

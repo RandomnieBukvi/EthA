@@ -25,11 +25,7 @@ void initVariables() {
   userDataRef = FirebaseDatabase.instance
       .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
   isWeaponNotAquired = false;
-  book = {};
-  notepad = {};
   inventoryDataRef = userDataRef.child('inventory');
-  bookItems = [];
-  notepadItems = [];
 }
 
 class Fabs extends StatelessWidget {
@@ -100,7 +96,6 @@ class _FabTabsState extends State<FabTabs> {
     userDataRef = FirebaseDatabase.instance
         .ref()
         .child('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
-    initInventory();
     currentIndex = 0;
     experience =
         int.parse(userDataOnceOutside.child('experience').value.toString());
@@ -206,5 +201,38 @@ Future<DataSnapshot> loadData() async {
   var data = await FirebaseDatabase.instance
       .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}')
       .get();
+  await inventoryPreInit();
   return data;
+}
+
+Future<void> inventoryPreInit() async {
+  DataSnapshot invGet = await FirebaseDatabase.instance
+      .ref(
+          'usersData/${FirebaseAuth.instance.currentUser!.displayName}/inventory')
+      .get();
+  book = {};
+  notepad = {};
+  invGet.child('book').children.forEach((element) {
+    book.addAll({element.key: element.value});
+  });
+  Map bufer = Map();
+  weapons.keys.forEach((wKey) {
+    if (book[wKey] != null) {
+      bufer.addAll({wKey: book[wKey]});
+    }
+  });
+  book = bufer;
+
+
+  invGet.child('notepad').children.forEach((element) {
+    notepad.addAll({element.key: element.value});
+  });
+  bufer = {};
+  weapons.keys.forEach((wKey) {
+    if (notepad[wKey] != null) {
+      bufer.addAll({wKey: notepad[wKey]});
+    }
+  });
+  notepad = bufer;
+  initInventory();
 }

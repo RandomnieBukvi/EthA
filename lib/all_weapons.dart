@@ -9,10 +9,8 @@ Map<String, Weapon> weapons = {
       description: "Becomes a bat. Throws away an enemy",
       imagePath: '-',
       cost: 0),
-  'Multiply' : Weapon(
-      description: "Becomes a saw.",
-      imagePath: '*',
-      cost: 100)
+  'Multiply': Weapon(description: "Becomes a saw.", imagePath: '*', cost: 100),
+  'Divide': Weapon(description: "Becomes a spear. Can be used as close and distance weapon", imagePath: '/', cost: 100),
 };
 
 class Weapon {
