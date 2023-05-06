@@ -5,20 +5,32 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/all_weapons.dart';
 
-Map inventory = Map();
+Map book = Map();
+Map notepad = Map();
 DatabaseReference inventoryDataRef = FirebaseDatabase.instance.ref(
     'usersData/${FirebaseAuth.instance.currentUser!.displayName}/inventory');
 
 late StreamSubscription<DatabaseEvent> inventoryChange;
 void initInventory() async {
   inventoryChange = inventoryDataRef.onValue.listen((event) async {
-    inventory = {};
-    event.snapshot.children.forEach((element) {
-      inventory.addAll({element.key: element.value});
+    book = {};
+    event.snapshot.child('book').children.forEach((element) {
+      print(element.key);
+      book.addAll({element.key: element.value});
     });
+    notepad = {};
+    event.snapshot.child('notepad').children.forEach((element) {
+      notepad.addAll({element.key: element.value});
+    });
+    print('book: $book & notepad: $notepad');
+    bookItems = [];
+    notepadItems = [];
   });
 }
-List<Widget> items = [];
+
+List<Widget> bookItems = [];
+List<Widget> notepadItems = [];
+
 class Inventory extends StatefulWidget {
   const Inventory({super.key});
 
@@ -27,28 +39,27 @@ class Inventory extends StatefulWidget {
 }
 
 class InventoryState extends State<Inventory> {
-  @override
+  /* @override
   void initState() {
-    items.clear();
-    inventory.forEach((key, value) {
-      items.add(Text(weapons[int.parse(key)].name));
+    bookItems.clear();
+    book.forEach((key, value) {
+      bookItems.add(Text(weapons[int.parse(key)].name, style: TextStyle(fontSize: 50),));
+    });
+    notepadItems.clear();
+    notepad.forEach((key, value) {
+      notepadItems.add(Text(weapons[int.parse(key)].name, style: TextStyle(fontSize: 50),));
     });
     // TODO: implement initState
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    //inventoryChange.cancel();
-    // TODO: implement dispose
-    super.dispose();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        children: items,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: [Text('lol')],
       ),
     );
   }

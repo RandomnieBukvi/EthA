@@ -19,15 +19,17 @@ late DataSnapshot userDataOnceOutside;
 void initVariables() {
   //установка начальных значений для переменных
   double weaponActionsPositon = 0;
-  weaponTxt = weapons[0].name;
-  weaponDesc = weapons[0].description;
+  weaponTxt = weapons.keys.elementAt(0);
+  weaponDesc = weapons.values.elementAt(0).description;
   itemIndex = 0;
   userDataRef = FirebaseDatabase.instance
       .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
   isWeaponNotAquired = false;
-  inventory = {};
+  book = {};
+  notepad = {};
   inventoryDataRef = userDataRef.child('inventory');
-  items = [];
+  bookItems = [];
+  notepadItems = [];
 }
 
 class Fabs extends StatelessWidget {
@@ -47,6 +49,7 @@ class Fabs extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       print("GOT NAME");
+                      userDataOnceOutside = snapshot.data!;
                       initVariables();
                       return FabTabs();
                     } else {
@@ -59,13 +62,13 @@ class Fabs extends StatelessWidget {
               return FutureBuilder(
                   future: loadData(),
                   builder: (context, snapshot) {
-                    if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData) {
                       userDataOnceOutside = snapshot.data!;
-                    print("HAVE NAME");
-                    initVariables();
-                    return FabTabs();
-                    }
-                    else{
+                      print("HAVE NAME");
+                      initVariables();
+                      return FabTabs();
+                    } else {
                       return Scaffold(
                         body: Center(child: CircularProgressIndicator()),
                       );
@@ -95,7 +98,8 @@ class _FabTabsState extends State<FabTabs> {
   @override
   void initState() {
     userDataRef = FirebaseDatabase.instance
-      .ref().child('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
+        .ref()
+        .child('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
     initInventory();
     currentIndex = 0;
     experience =
@@ -106,11 +110,11 @@ class _FabTabsState extends State<FabTabs> {
       //var data = userDataRef.child(');
       var exp = data.child('experience').value.toString();
       var c = data.child('cash').value.toString();
-      if(exp != null && c != null){
+      if (exp != null && c != null) {
         setState(() {
-        experience = int.parse(exp);
-        cash = int.parse(c);
-      });
+          experience = int.parse(exp);
+          cash = int.parse(c);
+        });
       }
     });
     // TODO: implement initState

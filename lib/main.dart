@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/screens/FabTabs.dart';
 import 'package:lets_go/constans.dart';
@@ -28,7 +29,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    //FirebaseAuth.instance.signOut();
     return MaterialApp(
+      themeMode: ThemeMode.light,
       title: 'EthA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
