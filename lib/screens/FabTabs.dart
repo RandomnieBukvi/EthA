@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:lets_go/UserData.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/screens/inventory.dart';
 import 'package:lets_go/screens/map.dart';

@@ -13,6 +13,8 @@ DatabaseReference inventoryDataRef = FirebaseDatabase.instance.ref(
 
 late StreamSubscription<DatabaseEvent> inventoryChange;
 void initInventory() async {
+  inventoryDataRef = FirebaseDatabase.instance.ref(
+      'usersData/${FirebaseAuth.instance.currentUser!.displayName}/inventory');
   inventoryChange = inventoryDataRef.onValue.listen((event) {
     book = {};
     notepad = {};
@@ -99,11 +101,13 @@ class InventoryState extends State<Inventory> {
   }
 
   void notepadSet() async {
-    Map ntpd = Map();
-    notepadItems.forEach((element) {
-      ntpd.addAll({element: book[element]});
-    });
-    await inventoryDataRef.child('notepad').set(ntpd);
+    if (FirebaseAuth.instance.currentUser != null) {
+      Map ntpd = Map();
+      notepadItems.forEach((element) {
+        ntpd.addAll({element: book[element]});
+      });
+      await inventoryDataRef.child('notepad').set(ntpd);
+    }
   }
 
   @override
@@ -111,7 +115,12 @@ class InventoryState extends State<Inventory> {
     return Container(
       height: double.infinity,
       width: double.infinity,
-      color: Color(0xff6a4028),
+      decoration: BoxDecoration(
+          image: DecorationImage(
+        filterQuality: FilterQuality.none,
+        fit: BoxFit.cover,
+        image: AssetImage('assets/images/table background.png'),
+      )),
       child: Column(
         children: [
           Flexible(
@@ -152,13 +161,19 @@ class _NotepadState extends State<Notepad> {
           duration: Duration(milliseconds: 150),
           child: SizedBox(
             height: MediaQuery.of(context).size.height / 3,
-            width: MediaQuery.of(context).size.width / 2.2,
+            width: MediaQuery.of(context).size.width / 2.1,
             child: Container(
               height: double.infinity,
               width: double.infinity,
-              color: Colors.white,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                filterQuality: FilterQuality.none,
+                fit: BoxFit.fill,
+                image: AssetImage('assets/images/notepad.png'),
+              )),
               child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.only(
+                    left: 18, right: 10, top: 10, bottom: 10),
                 child: Wrap(
                   spacing: 2,
                   runSpacing: 2,
@@ -204,18 +219,23 @@ class _BookState extends State<Book> {
           height: MediaQuery.of(context).size.height / 2.8,
           width: MediaQuery.of(context).size.width * 6 / 7,
           child: Container(
-            color: kPrimaryColor,
             height: double.infinity,
             width: double.infinity,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+              filterQuality: FilterQuality.none,
+              fit: BoxFit.fitHeight,
+              alignment: Alignment.centerLeft,
+              image: AssetImage('assets/images/book.png'),
+            )),
             child: Padding(
               padding: const EdgeInsets.only(
-                  left: 10, right: 70, top: 10, bottom: 10),
+                  left: 10, right: 50, top: 10, bottom: 10),
               child: Container(
-                color: Colors.white,
                 height: double.infinity,
                 width: double.infinity,
                 child: Padding(
-                  padding: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(25.0),
                   child: Wrap(
                     spacing: 4,
                     runSpacing: 4,

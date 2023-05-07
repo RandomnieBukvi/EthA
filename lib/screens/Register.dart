@@ -406,7 +406,6 @@ Future<DataSnapshot> setDataOnRegister() async {
       },
       'notepad': {
         'Plus': {'level': 1},
-        'Minus': {'level': 1},
       },
     }
   });

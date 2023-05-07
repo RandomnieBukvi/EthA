@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lets_go/screens/FabTabs.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_go/screens/inventory.dart';
 import 'package:lets_go/screens/leader_board.dart';
 import 'package:lets_go/screens/profile.dart';
 import 'package:lets_go/screens/settings.dart';
@@ -25,7 +26,8 @@ class _SideMenuState extends State<SideMenu> {
           SizedBox(
             height: 150,
             child: GestureDetector(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyProfileScreen())),
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => MyProfileScreen())),
               child: Container(
                 padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top + 20,
@@ -67,7 +69,10 @@ class _SideMenuState extends State<SideMenu> {
                       ),
                     ),
                     kWidthSizedBox,
-                    Icon(Icons.arrow_forward_ios,color: Colors.white,)
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white,
+                    )
                   ],
                 ),
               ),
@@ -90,7 +95,14 @@ class _SideMenuState extends State<SideMenu> {
                 ListTile(
                   leading: Icon(Icons.logout),
                   title: Text("Log out"),
-                  onTap: () {
+                  onTap: () async {
+                    //setting notepad
+                    Map ntpd = Map();
+                    notepadItems.forEach((element) {
+                      ntpd.addAll({element: book[element]});
+                    });
+                    await inventoryDataRef.child('notepad').set(ntpd);
+                    /////////
                     FirebaseAuth.instance.signOut();
                   },
                 )
