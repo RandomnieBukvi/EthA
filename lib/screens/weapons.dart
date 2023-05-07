@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -5,13 +7,14 @@ import 'package:lets_go/constans.dart';
 import 'package:lets_go/all_weapons.dart';
 import 'package:lets_go/screens/inventory.dart';
 
-double weaponActionsPositon = 0;
+double weaponActionsPositon = -400;
 String weaponTxt = weapons.keys.elementAt(0);
 String weaponDesc = weapons.values.elementAt(0).description;
 int itemIndex = 0;
 DatabaseReference userDataRef = FirebaseDatabase.instance
     .ref('usersData/${FirebaseAuth.instance.currentUser!.displayName}');
 bool isWeaponNotAquired = false;
+String cost = weapons.values.elementAt(0).cost.toString();
 
 class Weapons extends StatefulWidget {
   Weapons({super.key});
@@ -28,6 +31,13 @@ class _WeaponsState extends State<Weapons> {
     weaponDesc = weapons.values.elementAt(0).description;
     itemIndex = 0;
     isWeaponNotAquired = !book.containsKey(weapons.keys.elementAt(itemIndex));
+    cost = weapons.values.elementAt(0).cost.toString();
+    weaponActionsPositon = -500;
+    Future.delayed(Duration.zero,(){
+      setState(() {
+        weaponActionsPositon = 0;
+      });
+    });
     // TODO: implement initState
     super.initState();
   }
@@ -75,6 +85,10 @@ class _WeaponsState extends State<Weapons> {
                                       .description;
                                   isWeaponNotAquired = !book.containsKey(
                                       weapons.keys.elementAt(itemIndex));
+                                  cost = weapons.values
+                                      .elementAt(itemIndex)
+                                      .cost
+                                      .toString();
                                 });
                               });
                               setState(() {
@@ -144,7 +158,7 @@ class WeaponBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(30.0),
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width / 10),
       child: SizedBox(
         height: 300,
         width: 300,
@@ -188,6 +202,7 @@ class _WeaponActionsState extends State<WeaponActions> {
           width: double.infinity,
         ),
         AnimatedPositioned(
+          curve: Curves.ease,
           duration: Duration(milliseconds: 150),
           bottom: weaponActionsPositon,
           child: SizedBox(
@@ -255,10 +270,7 @@ class _WeaponActionsState extends State<WeaponActions> {
                                       });
                                     }
                                   },
-                                  child: Text(weapons.values
-                                      .elementAt(itemIndex)
-                                      .cost
-                                      .toString()))
+                                  child: Text(cost))
                               : Container(),
                         ],
                       ),
