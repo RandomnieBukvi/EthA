@@ -55,17 +55,13 @@ class _SideMenuState extends State<SideMenu> {
                     Flexible(
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
-                        child: user.displayName == null
-                            ? CircularProgressIndicator(
-                                color: kTextBlackColor,
-                              )
-                            : Text(
-                                user.displayName!,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25,
-                                    color: Colors.white),
-                              ),
+                        child: Text(
+                          user.displayName!,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: Colors.white),
+                        ),
                       ),
                     ),
                     kWidthSizedBox,
@@ -83,18 +79,47 @@ class _SideMenuState extends State<SideMenu> {
             child: Column(
               children: [
                 ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text("Settings"),
+                    leading: Container(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.none,
+                              image: AssetImage('assets/icons/settings.png'))),
+                      width: 20,
+                      height: 20,
+                    ),
+                    title: Text(
+                      "Settings",
+                      style: TextStyle(color: Colors.black),
+                    ),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => GameSettings()))),
                 ListTile(
-                    leading: Icon(Icons.leaderboard_outlined),
-                    title: Text("Leaderboard"),
+                    leading: Container(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.none,
+                              image:
+                                  AssetImage('assets/icons/leaderboard.png'))),
+                      width: 20,
+                      height: 20,
+                    ),
+                    title: Text("Leaderboard",
+                        style: TextStyle(color: Colors.black)),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => LeaderBoard()))),
                 ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text("Log out"),
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.none,
+                            image: AssetImage('assets/icons/logout.png'))),
+                    width: 20,
+                    height: 20,
+                  ),
+                  title: Text("Log out", style: TextStyle(color: Colors.black)),
                   onTap: () async {
                     //setting notepad
                     Map ntpd = Map();

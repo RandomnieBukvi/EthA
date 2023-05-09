@@ -66,7 +66,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       children: [
                           FittedBox(
                             fit: BoxFit.fitWidth,
-                            child: user.displayName == null ? CircularProgressIndicator(color: kTextBlackColor,) : Text(
+                            child: Text(
                               user.displayName!,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),

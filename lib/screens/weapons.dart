@@ -33,7 +33,7 @@ class _WeaponsState extends State<Weapons> {
     isWeaponNotAquired = !book.containsKey(weapons.keys.elementAt(itemIndex));
     cost = weapons.values.elementAt(0).cost.toString();
     weaponActionsPositon = -500;
-    Future.delayed(Duration.zero,(){
+    Future.delayed(Duration.zero, () {
       setState(() {
         weaponActionsPositon = 0;
       });
@@ -47,7 +47,11 @@ class _WeaponsState extends State<Weapons> {
     return Container(
       height: double.infinity,
       width: double.infinity,
-      color: Colors.grey,
+      decoration: BoxDecoration(image: DecorationImage(
+                filterQuality: FilterQuality.none,
+                fit: BoxFit.cover,
+                image: AssetImage('assets/images/stand background.png'),
+              )),
       child: Column(
         children: [
           Flexible(
@@ -159,27 +163,30 @@ class WeaponBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(MediaQuery.of(context).size.width / 10),
-      child: SizedBox(
-        height: 300,
-        width: 300,
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(15))),
-          child: GridPaper(
+      child: Stack(children: [
+        SizedBox(
+          height: 300,
+          width: 300,
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(15))),
+            child: GridPaper(
               divisions: 1,
               subdivisions: 1,
               interval: 20,
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Center(
-                  child: Text(weapons.values.elementAt(index).imagePath,
-                      style: TextStyle(fontSize: 60)),
-                ),
-              )),
+            ),
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Center(
+            child: Text(weapons.values.elementAt(index).operationSymbol,
+                style: TextStyle(fontSize: 60)),
+          ),
+        )
+      ]),
     );
   }
 }
@@ -207,78 +214,66 @@ class _WeaponActionsState extends State<WeaponActions> {
           bottom: weaponActionsPositon,
           child: SizedBox(
             height: MediaQuery.of(context).size.height / 2.5,
-            width: MediaQuery.of(context).size.width / 1.2,
-            child: Container(
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15))),
-              alignment: Alignment.topCenter,
-              child: GridPaper(
-                interval: 20,
-                divisions: 1,
-                subdivisions: 1,
-                child: Stack(
+            width: MediaQuery.of(context).size.width / 1.1,
+            child: Stack(alignment: AlignmentDirectional.center, children: [
+              Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15))),
+                child: GridPaper(
+                  interval: 20,
+                  divisions: 1,
+                  subdivisions: 1,
+                  child: Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
                   children: [
-                    Container(
-                      height: double.infinity,
-                      width: double.infinity,
+                    Text(
+                      weaponTxt,
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            weaponTxt,
-                            style: TextStyle(
-                                fontSize: 30, fontWeight: FontWeight.bold),
-                          ),
-                          Text(weaponDesc, style: TextStyle(fontSize: 20)),
-                          Divider(
-                            thickness: 2,
-                            color: kPrimaryColor,
-                          ),
-                          isWeaponNotAquired
-                              ? ElevatedButton(
-                                  onPressed: () async {
-                                    var event = await userDataRef.get();
-                                    if (int.parse(event
-                                            .child('cash')
-                                            .value
-                                            .toString()) <
-                                        weapons.values
-                                            .elementAt(itemIndex)
-                                            .cost) {
-                                      print("LOL YOU GOT NO MONEY");
-                                    } else {
-                                      userDataRef
-                                          .child(
-                                              'inventory/book/${weapons.keys.elementAt(itemIndex)}')
-                                          .set({'level': 1});
-                                      userDataRef.child('cash').set(int.parse(
-                                              event
-                                                  .child('cash')
-                                                  .value
-                                                  .toString()) -
-                                          weapons.values
-                                              .elementAt(itemIndex)
-                                              .cost);
-                                      setState(() {
-                                        isWeaponNotAquired = false;
-                                      });
-                                    }
-                                  },
-                                  child: Text(cost))
-                              : Container(),
-                        ],
-                      ),
+                    Text(weaponDesc, style: TextStyle(fontSize: 20)),
+                    Divider(
+                      thickness: 2,
+                      color: kPrimaryColor,
                     ),
+                    isWeaponNotAquired
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              var event = await userDataRef.get();
+                              if (int.parse(
+                                      event.child('cash').value.toString()) <
+                                  weapons.values.elementAt(itemIndex).cost) {
+                                print("LOL YOU GOT NO MONEY");
+                              } else {
+                                userDataRef
+                                    .child(
+                                        'inventory/book/${weapons.keys.elementAt(itemIndex)}')
+                                    .set({'level': 1});
+                                userDataRef.child('cash').set(int.parse(
+                                        event.child('cash').value.toString()) -
+                                    weapons.values.elementAt(itemIndex).cost);
+                                setState(() {
+                                  isWeaponNotAquired = false;
+                                });
+                              }
+                            },
+                            child: Text(cost))
+                        : Container(),
                   ],
                 ),
               ),
-            ),
+            ]),
           ),
         )
       ],

@@ -52,8 +52,8 @@ class Inventory extends StatefulWidget {
   State<Inventory> createState() => InventoryState();
 }
 
-double? notepadOffset = -300;
-double? bookOffset = -300;
+double notepadOffset = -300;
+double bookOffset = -300;
 
 class InventoryState extends State<Inventory> {
   void notepadOnTap(int index) {
@@ -299,7 +299,7 @@ class _InventoryBoxState extends State<InventoryBox> {
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Center(
-              child: Text(weapons[widget.weaponKey]!.imagePath,
+              child: Text(weapons[widget.weaponKey]!.operationSymbol,
                   style: TextStyle(fontSize: 30)),
             ),
           ),

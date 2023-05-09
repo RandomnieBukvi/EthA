@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/screens/inventory.dart';
+import 'package:lets_go/screens/loading_screen.dart';
 import 'package:lets_go/screens/map.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/Auth.dart';
@@ -48,9 +49,7 @@ class Fabs extends StatelessWidget {
                       initVariables();
                       return FabTabs();
                     } else {
-                      return Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      );
+                      return LoadingScreen();
                     }
                   });
             } else {
@@ -64,9 +63,7 @@ class Fabs extends StatelessWidget {
                       initVariables();
                       return FabTabs();
                     } else {
-                      return Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      );
+                      return LoadingScreen();
                     }
                   });
             }
@@ -117,6 +114,7 @@ class _FabTabsState extends State<FabTabs> {
 
   @override
   void dispose() {
+    print("DISPOsE");
     userDataChange.cancel();
     inventoryChange.cancel();
     // TODO: implement dispose
@@ -129,6 +127,7 @@ class _FabTabsState extends State<FabTabs> {
   Widget build(BuildContext context) {
     Widget currentScreen = pages[currentIndex];
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
           elevation: 0,
           title: Row(
@@ -160,33 +159,51 @@ class _FabTabsState extends State<FabTabs> {
           },
           destinations: [
             NavigationDestination(
-                icon: Icon(
-                  Icons.map_sharp,
-                  color: Color.fromARGB(230, 255, 255, 255),
+                icon: Container(
+                  child: Image.asset(
+                    'assets/icons/map.png',
+                    filterQuality: FilterQuality.none,
+                    color: Color.fromARGB(230, 255, 255, 255),
+                  ),
                 ),
-                selectedIcon: Icon(
-                  Icons.map_sharp,
-                  color: Colors.black,
+                selectedIcon: Container(
+                  child: Image.asset(
+                    'assets/icons/map.png',
+                    filterQuality: FilterQuality.none,
+                    color: Colors.black,
+                  ),
                 ),
                 label: 'Map'),
             NavigationDestination(
-                icon: Icon(
-                  Icons.calculate_sharp,
-                  color: Color.fromARGB(230, 255, 255, 255),
+                icon: Container(
+                  child: Image.asset(
+                    'assets/icons/weapons.png',
+                    filterQuality: FilterQuality.none,
+                    color: Color.fromARGB(230, 255, 255, 255),
+                  ),
                 ),
-                selectedIcon: Icon(
-                  Icons.calculate_sharp,
-                  color: Colors.black,
+                selectedIcon: Container(
+                  child: Image.asset(
+                    'assets/icons/weapons.png',
+                    filterQuality: FilterQuality.none,
+                    color: Colors.black,
+                  ),
                 ),
                 label: 'Weapons'),
             NavigationDestination(
-                icon: Icon(
-                  Icons.calendar_view_month_sharp,
-                  color: Color.fromARGB(230, 255, 255, 255),
+                icon: Container(
+                  child: Image.asset(
+                    'assets/icons/inventory.png',
+                    filterQuality: FilterQuality.none,
+                    color: Color.fromARGB(230, 255, 255, 255),
+                  ),
                 ),
-                selectedIcon: Icon(
-                  Icons.calendar_view_month_sharp,
-                  color: Colors.black,
+                selectedIcon: Container(
+                  child: Image.asset(
+                    'assets/icons/inventory.png',
+                    filterQuality: FilterQuality.none,
+                    color: Colors.black,
+                  ),
                 ),
                 label: 'Inventory'),
           ],
@@ -221,7 +238,6 @@ Future<void> inventoryPreInit() async {
     }
   });
   book = bufer;
-
 
   invGet.child('notepad').children.forEach((element) {
     notepad.addAll({element.key: element.value});
