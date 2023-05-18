@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/Utils.dart';
 import 'package:lets_go/all_weapons.dart';
+import 'package:lets_go/screens/FabTabs.dart';
 import 'package:lets_go/screens/inventory.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 import '../constans.dart';
+import 'game_flame.dart';
 
 bool notepadIsShowing = false;
 bool memoryIsShowing = false;
-bool mathProblemSheetShowing = false;
+bool dontShowArrows = false;
+bool doArrowsWork = true;
+var gameInstance = Play();
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -55,8 +60,8 @@ class _GameState extends State<Game> {
   }
 
   doneButtonAction() {
-    MathProblem.operationsList = chosedWeaponsBuf.map((e) => e.wkey).toList();
-    MathProblem.makeProblem();
+    gameInstance.onDirectionChanged(Direction.idle);
+    MathProblem.makeProblem(chosedWeaponsBuf.map((e) => e.wkey).toList());
     MathProblem.evaluateProblem();
     setState(() {
       notepadOffsetGame = -500;
@@ -64,30 +69,44 @@ class _GameState extends State<Game> {
     });
     Future.delayed(Duration(milliseconds: 150), () {
       setState(() {
-        mathProblemSheetShowing = false;
+        dontShowArrows = true;
         mathProblemSheetOffset = 0;
       });
     });
   }
 
-  mathProblemSolvedCorrect(){
+  mathProblemSolvedCorrect() {
     setState(() {
-      memory.add(ChosedWeaponsOrder(chosedOrder: chosedWeaponsBuf));
+      memory.add(ChosedWeaponsOrder(
+        chosedOrder: chosedWeaponsBuf,
+        index: memory.length,
+        onTap: removeFromMemory,
+      ));
       chosedWeaponsBuf = [];
       mathProblemSheetOffset = -500;
+      dontShowArrows = false;
     });
-    Future.delayed(Duration(milliseconds: 75), (){
+    Future.delayed(Duration(milliseconds: 75), () {
       showButtons();
     });
   }
 
-  mathProblemSolvedWrong(){
+  mathProblemSolvedWrong() {
     setState(() {
       chosedWeaponsBuf = [];
       mathProblemSheetOffset = -500;
+      dontShowArrows = false;
     });
-    Future.delayed(Duration(milliseconds: 75), (){
+    Future.delayed(Duration(milliseconds: 75), () {
       showButtons();
+    });
+  }
+
+  removeFromMemory(int index) {
+    gameInstance.onDirectionChanged(Direction.none);
+    doArrowsWork = false;
+    setState(() {
+      memory.removeAt(index);
     });
   }
 
@@ -104,6 +123,21 @@ class _GameState extends State<Game> {
     rightButtonOffset = -50;
     // TODO: implement dispose
     super.dispose();
+  }
+
+  clearGame() {
+    notepadIsShowing = false;
+    memoryIsShowing = false;
+    dontShowArrows = false;
+    doArrowsWork = true;
+    gameInstance = Play();
+    rightButtonOffset = -150;
+    leftButtonOffset = -150;
+    notepadOffsetGame = -500;
+    chosedWeaponsBuf = [];
+    mathProblemSheetOffset = -500;
+    memoryOffset = -500;
+    memory = [];
   }
 
   @override
@@ -167,20 +201,9 @@ class _GameState extends State<Game> {
         Container(
           height: double.infinity,
           width: double.infinity,
-        ),
-        Column(
-          children: [
-            Flexible(
-                flex: 1,
-                child: Container(
-                  color: Colors.blue,
-                )),
-            Flexible(
-                flex: 1,
-                child: Container(
-                  color: Colors.greenAccent,
-                )),
-          ],
+          child: GameWidget(
+            game: gameInstance,
+          ),
         ),
         AnimatedPositioned(
           curve: Curves.ease,
@@ -190,7 +213,18 @@ class _GameState extends State<Game> {
               MediaQuery.of(context).size.width / 8,
           child: gameButton(
               context: context,
-              icon: Icon(Icons.history),
+              icon: Container(
+                height: MediaQuery.of(context).size.width / 7,
+                width: MediaQuery.of(context).size.width / 7,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Image.asset(
+                    'assets/icons/brain.png',
+                    filterQuality: FilterQuality.none,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
               onTap: () {
                 memoryIsShowing = true;
                 hideButtons();
@@ -209,7 +243,18 @@ class _GameState extends State<Game> {
               MediaQuery.of(context).size.width / 8,
           child: gameButton(
               context: context,
-              icon: Icon(Icons.book),
+              icon: Container(
+                height: MediaQuery.of(context).size.width / 7,
+                width: MediaQuery.of(context).size.width / 7,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Image.asset(
+                    'assets/icons/notepad.png',
+                    filterQuality: FilterQuality.none,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
               onTap: () {
                 notepadIsShowing = true;
                 hideButtons();
@@ -225,7 +270,31 @@ class _GameState extends State<Game> {
         ),
         notepadOffsetGame == 0 ? ChosedWeaponsBuffer() : Container(),
         Memory(),
-        MathProblemSheet(onCorrect: mathProblemSolvedCorrect, onWrong: mathProblemSolvedWrong,),
+        MathProblemSheet(
+          onCorrect: mathProblemSolvedCorrect,
+          onWrong: mathProblemSolvedWrong,
+        ),
+        dontShowArrows
+            ? Container()
+            : Arrows(onDirectionChanged: gameInstance.onDirectionChanged),
+        Positioned(
+          top: MediaQuery.of(context).padding.top,
+          child: GestureDetector(
+            onTap: () {
+              clearGame();
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: ((context) => Fabs())));
+            },
+            child: SizedBox(
+                height: MediaQuery.of(context).size.width / 7,
+                width: MediaQuery.of(context).size.width / 7,
+                child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Color.fromARGB(127, 255, 255, 255)),
+                    child: Center(child: Icon(Icons.logout_sharp)))),
+          ),
+        ),
       ]),
     );
   }
@@ -235,7 +304,7 @@ double rightButtonOffset = -150;
 double leftButtonOffset = -150;
 Widget gameButton(
     {required BuildContext context,
-    required Icon icon,
+    required Widget icon,
     required Function() onTap}) {
   return GestureDetector(
     onTap: onTap,
@@ -247,6 +316,64 @@ Widget gameButton(
                 borderRadius: BorderRadius.circular(15), color: Colors.white),
             child: Center(child: icon))),
   );
+}
+
+class Arrows extends StatelessWidget {
+  const Arrows({super.key, required this.onDirectionChanged});
+  final ValueChanged<Direction> onDirectionChanged;
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: MediaQuery.of(context).size.height / 2,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.width / 4,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTapDown: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.left),
+              onLongPressDown: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.left),
+              onTapUp: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.idle),
+              onLongPressEnd: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.idle),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.width / 4,
+                  width: MediaQuery.of(context).size.width / 6,
+                  child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Color.fromARGB(127, 255, 255, 255)),
+                      child:
+                          Center(child: Icon(Icons.arrow_back_ios_new_sharp)))),
+            ),
+            GestureDetector(
+              onTapDown: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.right),
+              onLongPressDown: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.right),
+              onTapUp: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.idle),
+              onLongPressEnd: (details) =>
+                  !doArrowsWork ? null : onDirectionChanged(Direction.idle),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.width / 4,
+                  width: MediaQuery.of(context).size.width / 6,
+                  child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Color.fromARGB(127, 255, 255, 255)),
+                      child:
+                          Center(child: Icon(Icons.arrow_forward_ios_sharp)))),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 double notepadOffsetGame = -500;
@@ -375,10 +502,9 @@ class _ChosedWeaponsBufferState extends State<ChosedWeaponsBuffer> {
 }
 
 class MathProblem {
-  static List<String> operationsList = [];
   static String problem = '';
   static double answer = 0;
-  static void makeProblem() {
+  static void makeProblem(List<String> operationsList) {
     problem = '';
     answer = 0;
     var random = Random();
@@ -393,8 +519,8 @@ class MathProblem {
     if (operation == '/') {
       previousNumber = _makeDividable('');
     } else {
-      previousNumber = random.nextInt(100);
-      nowNumber = random.nextInt(100);
+      previousNumber = random.nextInt(11);
+      nowNumber = random.nextInt(11);
       problem += previousNumber.toString() + operation + nowNumber.toString();
       previousNumber = nowNumber;
     }
@@ -407,7 +533,7 @@ class MathProblem {
       if (operation == '/') {
         previousNumber = _makeDividable(previousNumber.toString());
       } else {
-        nowNumber = random.nextInt(100);
+        nowNumber = random.nextInt(11);
         problem += operation + nowNumber.toString();
         previousNumber = nowNumber;
       }
@@ -418,13 +544,12 @@ class MathProblem {
     answer =
         Parser().parse(problem).evaluate(EvaluationType.REAL, ContextModel());
     print(answer);
-    
   }
 
   static int _makeDividable(String previousNumber) {
     problem = problem.substring(0, problem.length - previousNumber.length);
-    int a = Random().nextInt(10) + 1;
-    int b = Random().nextInt(10) + 1;
+    int a = Random().nextInt(5) + 1;
+    int b = Random().nextInt(5) + 1;
     problem += (a * b).toString() + '/' + b.toString();
     return b;
   }
@@ -550,25 +675,40 @@ class _MathProblemSheetState extends State<MathProblemSheet> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 10,),
+                      SizedBox(
+                        width: 10,
+                      ),
                       Flexible(
-                        flex: 1,
+                          flex: 1,
                           child: SizedBox(
                             height: 55,
                             child: ElevatedButton(
                                 onPressed: () {
-                                  if(double.parse(mathProblemAnswerField.text) == MathProblem.answer){
-                                    Utils.showSnackBar(context: context, text: 'Correct!', color: Colors.green);
-                                    widget.onCorrect();
-                                    mathProblemAnswerField.clear();
-                                    FocusManager.instance.primaryFocus!.unfocus();
-                                  }else{
-                                    Utils.showSnackBar(context: context, text: 'Wrong, ${MathProblem.answer}', color: Colors.red);
-                                    widget.onWrong();
-                                    mathProblemAnswerField.clear();
-                                    FocusManager.instance.primaryFocus!.unfocus();
+                                  if (mathProblemAnswerField.text.isNotEmpty) {
+                                    if (double.parse(
+                                            mathProblemAnswerField.text) ==
+                                        MathProblem.answer) {
+                                      Utils.showSnackBar(
+                                          context: context,
+                                          text: 'Correct!',
+                                          color: Colors.green);
+                                      widget.onCorrect();
+                                      mathProblemAnswerField.clear();
+                                      FocusManager.instance.primaryFocus!
+                                          .unfocus();
+                                    } else {
+                                      Utils.showSnackBar(
+                                          context: context,
+                                          text: 'Wrong, ${MathProblem.answer}',
+                                          color: Colors.red);
+                                      widget.onWrong();
+                                      mathProblemAnswerField.clear();
+                                      FocusManager.instance.primaryFocus!
+                                          .unfocus();
+                                    }
                                   }
-                                }, child: Icon(Icons.done)),
+                                },
+                                child: Icon(Icons.done)),
                           ))
                     ],
                   )
@@ -583,8 +723,14 @@ class _MathProblemSheetState extends State<MathProblemSheet> {
 }
 
 class ChosedWeaponsOrder extends StatelessWidget {
-  ChosedWeaponsOrder({super.key, required this.chosedOrder});
+  ChosedWeaponsOrder(
+      {super.key,
+      required this.chosedOrder,
+      required this.index,
+      required this.onTap});
   List<WeaponBoxGame> chosedOrder;
+  Function(int) onTap;
+  int index;
   @override
   Widget build(BuildContext context) {
     List<Widget> order = chosedOrder
@@ -606,50 +752,58 @@ class ChosedWeaponsOrder extends StatelessWidget {
               ),
             ))
         .toList();
-    return order.length < 8
-        ? SizedBox(
-            height: 37.5 + 16,
-            width: order.length * 37.5 + 16,
-            child: Container(
-              height: double.infinity,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: Color(0x7FC3E8F3),
-                    width: 2,
-                    strokeAlign: BorderSide.strokeAlignOutside),
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-              ),
-              padding: EdgeInsets.all(8),
-              child: Row(
-                children: order,
-              ),
-            ),
-          )
-        : SizedBox(
-            height: 37.5 + 16,
-            width: 7 * 37.5 + 16,
-            child: Container(
-              height: double.infinity,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: Color(0x7FC3E8F3),
-                    width: 2,
-                    strokeAlign: BorderSide.strokeAlignOutside),
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-              ),
-              padding: EdgeInsets.all(8),
-              child: FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Row(
-                  children: order,
+    return GestureDetector(
+        onTap: () {
+          if (isAttacking == false) {
+            isAttacking = true;
+            gameInstance.attack(index);
+            onTap(index);
+          }
+        },
+        child: order.length < 8
+            ? SizedBox(
+                height: 37.5 + 16,
+                width: order.length * 37.5 + 16,
+                child: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Color(0x7FC3E8F3),
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignOutside),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Row(
+                    children: order,
+                  ),
                 ),
-              ),
-            ),
-          );
+              )
+            : SizedBox(
+                height: 37.5 + 16,
+                width: 7 * 37.5 + 16,
+                child: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Color(0x7FC3E8F3),
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignOutside),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Row(
+                      children: order,
+                    ),
+                  ),
+                ),
+              ));
   }
 }
 
@@ -708,9 +862,17 @@ class _MemoryState extends State<Memory> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.history,
-                    size: 40,
+                  Container(
+                    height: MediaQuery.of(context).size.width / 7,
+                    width: MediaQuery.of(context).size.width / 7,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Image.asset(
+                        'assets/icons/brain.png',
+                        filterQuality: FilterQuality.none,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                   Divider(
                     thickness: 2,

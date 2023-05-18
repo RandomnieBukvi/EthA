@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_go/UserData.dart';
 import 'package:lets_go/constans.dart';
 import 'package:lets_go/screens/FabTabs.dart';
 import 'package:lets_go/shared_prefs.dart';
