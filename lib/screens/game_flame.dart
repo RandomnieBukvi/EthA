@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:lets_go/all_weapons.dart';
 import 'package:lets_go/screens/game.dart';
 
-enum Direction { left, right, idle, none}
+enum Direction { left, right, idle, none }
 
 bool isAttacking = false;
 
@@ -71,14 +71,15 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     direction = Direction.none;
     List<WeaponBoxGame> buf = memory[index].chosedOrder;
     int i = 1;
-    for(WeaponBoxGame element in buf) {
+    for (WeaponBoxGame element in buf) {
       print('${element.wkey}');
       if (operationSymbolToAnimation[weapons[element.wkey]?.operationSymbol] !=
           null) {
         print('passed');
         SpriteAnimation anim =
-            operationSymbolToAnimation[weapons[element.wkey]!.operationSymbol]!.clone();
-        
+            operationSymbolToAnimation[weapons[element.wkey]!.operationSymbol]!
+                .clone();
+
         anim.loop = false;
         setAnimation(anim);
         await anim.completed.then((value) async {
@@ -102,7 +103,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     direction = Direction.idle;
   }
 
-  setAnimation(SpriteAnimation value){
+  setAnimation(SpriteAnimation value) {
     animation = value;
     return animation;
   }
@@ -131,6 +132,16 @@ class Player extends SpriteAnimationComponent with HasGameRef {
               columns: 15,
               rows: 1)
           .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 14),
+      '/': SpriteSheet.fromColumnsAndRows(
+              image: await gameRef.images.load('spear attack-Sheet.png'),
+              columns: 9,
+              rows: 1)
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8),
+      '+': SpriteSheet.fromColumnsAndRows(
+              image: await gameRef.images.load('attack suriken-Sheet.png'),
+              columns: 10,
+              rows: 1)
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 9),
     };
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
@@ -144,7 +155,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   void update(double dt) {
     if (dontShowArrows == true) {
       animation = _idleAnimation;
-    }else {
+    } else {
       print(direction);
       switch (direction) {
         case Direction.idle:
