@@ -25,8 +25,9 @@ class GameMap extends StatelessWidget {
               width: double.infinity,
             ),
             Positioned(
-              left: MediaQuery.of(context).size.height * 1.3,
-              top: MediaQuery.of(context).size.height / 1.4,
+              left: MediaQuery.of(context).size.height / 2,
+              top: MediaQuery.of(context).size.height / 2
+              ,
               child: GestureDetector(
                 onTap: (){
                   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: ((context) => Game())));
