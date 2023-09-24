@@ -134,38 +134,38 @@ class Player extends SpriteAnimationComponent with HasGameRef {
 
   @override
   FutureOr<void> onLoad() async {
-    _idleAnimation = SpriteSheet.fromColumnsAndRows(
+    _idleAnimation = await createAnimation(name: 'stand fish-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
             image: await gameRef.images.load('stand fish-Sheet.png'),
             columns: 12,
             rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11);
-    _walkAnimation = SpriteSheet.fromColumnsAndRows(
+        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11)*/;
+    _walkAnimation = await createAnimation(name: 'walking fish-Sheet.png', gameRef: gameRef, frames: 8, loop: true)/*SpriteSheet.fromColumnsAndRows(
             image: await gameRef.images.load('walking fish-Sheet.png'),
             columns: 8,
             rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 7);
+        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 7)*/;
     ////Map который поможет сопостовлять операции с их анимацией
     operationSymbolToAnimation = {
-      '-': SpriteSheet.fromColumnsAndRows(
+      '-': await createAnimation(name: 'sword attack-Sheet.png', gameRef: gameRef, frames: 9)/*SpriteSheet.fromColumnsAndRows(
               image: await gameRef.images.load('sword attack-Sheet.png'),
               columns: 9,
               rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8),
-      '*': SpriteSheet.fromColumnsAndRows(
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8)*/,
+      '*': await createAnimation(name: 'benzapilaa attack-Sheet.png', gameRef: gameRef, frames: 15)/*SpriteSheet.fromColumnsAndRows(
               image: await gameRef.images.load('benzapilaa attack-Sheet.png'),
               columns: 15,
               rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 14),
-      '/': SpriteSheet.fromColumnsAndRows(
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 14)*/,
+      '/': await createAnimation(name: 'spear attack-Sheet.png', gameRef: gameRef, frames: 9)/*SpriteSheet.fromColumnsAndRows(
               image: await gameRef.images.load('spear attack-Sheet.png'),
               columns: 9,
               rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8),
-      '+': SpriteSheet.fromColumnsAndRows(
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8)*/,
+      '+': await createAnimation(name: 'attack suriken-Sheet.png', gameRef: gameRef, frames: 10)/*SpriteSheet.fromColumnsAndRows(
               image: await gameRef.images.load('attack suriken-Sheet.png'),
               columns: 10,
               rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 9),
+          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 9)*/,
     };
     /*animations = {
       'idle': _idleAnimation,
@@ -229,11 +229,11 @@ class Enemy extends SpriteAnimationComponent with HasGameRef {
   late final SpriteAnimation _idleAnimation;
   @override
   FutureOr<void> onLoad() async {
-    _idleAnimation = SpriteSheet.fromColumnsAndRows(
+    _idleAnimation = await createAnimation(name: 'monster stand-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
             image: await gameRef.images.load('monster stand-Sheet.png'),
             columns: 12,
             rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11);
+        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11)*/;
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 1.5;
@@ -246,7 +246,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef {
 
 Future<SpriteAnimation> createAnimation({required String name, required FlameGame gameRef, required int frames, bool loop = false}) async {
   return SpriteSheet.fromColumnsAndRows(
-            image: await gameRef.images.load('name'),
+            image: await gameRef.images.load(name),
             columns: frames,
             rows: 1)
         .createAnimation(row: 0, stepTime: 0.1, from: 0, to: frames - 1, loop: loop);
