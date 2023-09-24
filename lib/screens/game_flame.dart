@@ -16,11 +16,12 @@ enum Direction { left, right, idle, none }
 
 bool isAttacking = false;
 
-class Play extends FlameGame {
+class Play extends FlameGame with HasCollisionDetection{
   World world = World();
   late final CameraComponent cameraComponent;
 
   var _background = GameBackground();
+  late Vector2 worldSize;
 
   var _player = Player();
   onDirectionChanged(Direction dir) {
@@ -31,13 +32,13 @@ class Play extends FlameGame {
     _player.attack(index);
   }
 
-  var _enemy = Enemy();
+  late Enemy _enemy;
 
   @override
   FutureOr<void> onLoad() async {
     cameraComponent = CameraComponent(world: world);
     addAll([cameraComponent, world]);
-
+    _enemy = Enemy(player: _player, worldSize: _background.size);
     _player.scale = Vector2.all(2);
     _enemy.scale = Vector2.all(2);
     _player.sizeOfBackground = _background.size;
@@ -52,7 +53,7 @@ class Play extends FlameGame {
             Rect.fromLTRB(0, 0, _background.size.x, _background.size.y)*/
     );
     final halfViewportSize = cameraComponent.viewport.size;
-    final worldSize = _background.size;
+    worldSize = _background.size;
     cameraComponent.setBounds(
       Rectangle.fromCenter(
         center: worldSize / 2,
@@ -76,7 +77,7 @@ class GameBackground extends SpriteComponent with HasGameRef {
   }
 }
 
-class Player extends SpriteAnimationComponent with HasGameRef {
+class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks {
   Player({this.sizeOfBackground});
   double speed = 120;
   Vector2? sizeOfBackground;
@@ -134,6 +135,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
 
   @override
   FutureOr<void> onLoad() async {
+    add(RectangleHitbox(isSolid: true));
     _idleAnimation = await createAnimation(name: 'stand fish-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
             image: await gameRef.images.load('stand fish-Sheet.png'),
             columns: 12,
@@ -224,9 +226,19 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   }
 }
 
-class Enemy extends SpriteAnimationComponent with HasGameRef {
-  RectangleHitbox hitbox = RectangleHitbox();
+class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks {
+  Enemy({required this.player, required this.worldSize});
+  bool isTurnedRight = false;
+  final Player player;
   late final SpriteAnimation _idleAnimation;
+  bool isOnGround = true;
+  final gravity = 9.8;
+  var velosity = Vector2(0, 0);
+  final double jumpHeight = -250;
+  double jumpDelay = 2;
+  final double jumpDelayConst = 2;
+  final double speed = 100;
+  late Vector2 worldSize;
   @override
   FutureOr<void> onLoad() async {
     _idleAnimation = await createAnimation(name: 'monster stand-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
@@ -238,9 +250,55 @@ class Enemy extends SpriteAnimationComponent with HasGameRef {
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 1.5;
     y = gameRef.size[1] / 2;
-    await add(RectangleHitbox());
+    await add(RectangleHitbox(isSolid: true));
+    //worldSize = (parent!.parent as Play).worldSize;
     // TODO: implement onLoad
     return super.onLoad();
+  }
+
+  @override
+  void update(double dt) {
+    isOnGround = position.y >= worldSize.y / 2;
+    if(isOnGround){
+      velosity = Vector2.zero();
+      jumpDelay -= dt;
+    }else{
+      velosity.y += gravity;
+    }
+
+    if(position.x + velosity.x * dt <= 0 || position.x + velosity.x * dt >= worldSize.x) velosity.x = 0;
+
+    if(jumpDelay <= 0){
+      jumpDelay = jumpDelayConst;
+      velosity.y = jumpHeight;
+      velosity.x = isTurnedRight ? speed : -speed;
+    }
+    
+    position += velosity * dt;
+
+    if(player.position.x < position.x && isTurnedRight == true) {
+      flipHorizontally();
+      isTurnedRight = false;
+    } 
+    if(player.position.x > position.x && isTurnedRight == false) {
+      flipHorizontally();
+      isTurnedRight = true;
+    }
+    // TODO: implement update
+    super.update(dt);
+  }
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    print('Collision!!!!!!!!!!!!!!!!!!!!!!!!');
+    // TODO: implement onCollision
+    super.onCollisionStart(intersectionPoints, other);
+  }
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    print('endddddddddddddjasflkjfjafjljfasdljfd');
+    // TODO: implement onCollisionEnd
+    super.onCollisionEnd(other);
   }
 }
 
