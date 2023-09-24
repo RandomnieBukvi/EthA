@@ -5,15 +5,21 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/sprite.dart';
+//import 'package:flame/src/experimental/geometry/shapes/shape.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/all_weapons.dart';
 import 'package:lets_go/screens/game.dart';
+//import 'package:flame/src/experimental/geometry/shapes/rectangle.dart';
+import 'package:flame/experimental.dart';
 
 enum Direction { left, right, idle, none }
 
 bool isAttacking = false;
 
 class Play extends FlameGame {
+  World world = World();
+  late final CameraComponent cameraComponent;
+
   var _background = GameBackground();
 
   var _player = Player();
@@ -29,17 +35,32 @@ class Play extends FlameGame {
 
   @override
   FutureOr<void> onLoad() async {
-    await add(_background);
-    await add(_player);
-    await add(_enemy);
+    cameraComponent = CameraComponent(world: world);
+    addAll([cameraComponent, world]);
+
     _player.scale = Vector2.all(2);
     _enemy.scale = Vector2.all(2);
-    _player.flip = _player.flipHorizontally;
     _player.sizeOfBackground = _background.size;
-    camera.followComponent(_player,
-        worldBounds:
-            Rect.fromLTRB(0, 0, _background.size.x, _background.size.y));
+
+    await world.add(_background);
+    await world.add(_player);
+    await world.add(_enemy);
+
+    cameraComponent.follow(
+      _player,
+      /*worldBounds:
+            Rect.fromLTRB(0, 0, _background.size.x, _background.size.y)*/
+    );
+    final halfViewportSize = cameraComponent.viewport.size;
+    final worldSize = _background.size;
+    cameraComponent.setBounds(
+      Rectangle.fromCenter(
+        center: worldSize / 2,
+        size: worldSize - halfViewportSize,
+      ),
+    );
     // TODO: implement onLoad
+    //cameraComponent.setBounds();
     return super.onLoad();
   }
 }
@@ -56,9 +77,8 @@ class GameBackground extends SpriteComponent with HasGameRef {
 }
 
 class Player extends SpriteAnimationComponent with HasGameRef {
-  Player({this.flip, this.sizeOfBackground});
+  Player({this.sizeOfBackground});
   double speed = 120;
-  Function()? flip;
   Vector2? sizeOfBackground;
   bool isTurnedRight = true;
   Direction direction = Direction.idle;
@@ -68,6 +88,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   Map<String, SpriteAnimation> operationSymbolToAnimation = {};
 
   attack(int index) async {
+    print('ATTACCCCCCCCCCCCCCCCCCCCC');
     direction = Direction.none;
     List<WeaponBoxGame> buf = memory[index].chosedOrder;
     int i = 1;
@@ -81,11 +102,14 @@ class Player extends SpriteAnimationComponent with HasGameRef {
                 .clone();
 
         anim.loop = false;
-        setAnimation(anim);
-        await anim.completed.then((value) async {
+        animation = anim;
+        var animTicker = animationTicker;
+        //setAnimation(anim);
+        await animTicker?.completed.then((value) async {
           print("ANimATion played");
-          anim.loop = true;
-          setAnimation(_idleAnimation);
+          //anim.loop = true;
+          animation = _idleAnimation;
+          //setAnimation(_idleAnimation);
           await Future.delayed(Duration(milliseconds: 100));
           if (i == buf.length) {
             print('DONE');
@@ -103,10 +127,10 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     direction = Direction.idle;
   }
 
-  setAnimation(SpriteAnimation value) {
+  /*setAnimation(SpriteAnimation value) {
     animation = value;
     return animation;
-  }
+  }*/
 
   @override
   FutureOr<void> onLoad() async {
@@ -143,6 +167,11 @@ class Player extends SpriteAnimationComponent with HasGameRef {
               rows: 1)
           .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 9),
     };
+    /*animations = {
+      'idle': _idleAnimation,
+      'walk': _walkAnimation,
+      ...operationSymbolToAnimation
+    };*/
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 4;
@@ -156,7 +185,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     if (dontShowArrows == true) {
       animation = _idleAnimation;
     } else {
-      print(direction);
+      // print(direction);
       switch (direction) {
         case Direction.idle:
           animation = _idleAnimation;
@@ -168,7 +197,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
           }
           if (isTurnedRight == false) {
             isTurnedRight = true;
-            flip!();
+            flipHorizontally();
           }
           animation = _walkAnimation;
 
@@ -180,7 +209,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
           }
           if (isTurnedRight == true) {
             isTurnedRight = false;
-            flip!();
+            flipHorizontally();
           }
           animation = _walkAnimation;
           break;
@@ -213,4 +242,12 @@ class Enemy extends SpriteAnimationComponent with HasGameRef {
     // TODO: implement onLoad
     return super.onLoad();
   }
+}
+
+Future<SpriteAnimation> createAnimation({required String name, required FlameGame gameRef, required int frames, bool loop = false}) async {
+  return SpriteSheet.fromColumnsAndRows(
+            image: await gameRef.images.load('name'),
+            columns: frames,
+            rows: 1)
+        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: frames - 1, loop: loop);
 }

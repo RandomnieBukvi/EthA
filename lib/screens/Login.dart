@@ -24,6 +24,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     var ref = databseInstance.ref();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.center,
