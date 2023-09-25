@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/Utils.dart';
 import 'package:lets_go/all_weapons.dart';
+import 'package:lets_go/game/player.dart';
 import 'package:lets_go/screens/FabTabs.dart';
 import 'package:lets_go/screens/inventory.dart';
 import 'package:math_expressions/math_expressions.dart';
