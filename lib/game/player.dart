@@ -11,7 +11,8 @@ enum Direction { left, right, idle, none }
 
 bool isAttacking = false;
 
-class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks {
+class Player extends SpriteAnimationComponent
+    with HasGameRef, CollisionCallbacks {
   Player({this.sizeOfBackground});
   double speed = 120;
   Vector2? sizeOfBackground;
@@ -21,6 +22,7 @@ class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallback
   late final SpriteAnimation _walkAnimation;
   late ValueChanged<Function()> doFunct;
   Map<String, SpriteAnimation> operationSymbolToAnimation = {};
+  late RectangleHitbox playerHitbox;
 
   attack(int index) async {
     print('ATTACCCCCCCCCCCCCCCCCCCCC');
@@ -39,12 +41,9 @@ class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallback
         anim.loop = false;
         animation = anim;
         var animTicker = animationTicker;
-        //setAnimation(anim);
         await animTicker?.completed.then((value) async {
           print("ANimATion played");
-          //anim.loop = true;
           animation = _idleAnimation;
-          //setAnimation(_idleAnimation);
           await Future.delayed(Duration(milliseconds: 100));
           if (i == buf.length) {
             print('DONE');
@@ -62,62 +61,46 @@ class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallback
     direction = Direction.idle;
   }
 
-  /*setAnimation(SpriteAnimation value) {
-    animation = value;
-    return animation;
-  }*/
-
   @override
   FutureOr<void> onLoad() async {
-    add(RectangleHitbox(isSolid: true));
-    _idleAnimation = await createAnimation(name: 'stand fish-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
-            image: await gameRef.images.load('stand fish-Sheet.png'),
-            columns: 12,
-            rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11)*/;
-    _walkAnimation = await createAnimation(name: 'walking fish-Sheet.png', gameRef: gameRef, frames: 8, loop: true)/*SpriteSheet.fromColumnsAndRows(
-            image: await gameRef.images.load('walking fish-Sheet.png'),
-            columns: 8,
-            rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 7)*/;
+    //add(RectangleHitbox(isSolid: true));
+    _idleAnimation = await createAnimation(
+        name: 'stand fish-Sheet.png', gameRef: gameRef, frames: 12, loop: true);
+    _walkAnimation = await createAnimation(
+        name: 'walking fish-Sheet.png',
+        gameRef: gameRef,
+        frames: 8,
+        loop: true);
     ////Map который поможет сопостовлять операции с их анимацией
     operationSymbolToAnimation = {
-      '-': await createAnimation(name: 'sword attack-Sheet.png', gameRef: gameRef, frames: 9)/*SpriteSheet.fromColumnsAndRows(
-              image: await gameRef.images.load('sword attack-Sheet.png'),
-              columns: 9,
-              rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8)*/,
-      '*': await createAnimation(name: 'benzapilaa attack-Sheet.png', gameRef: gameRef, frames: 15)/*SpriteSheet.fromColumnsAndRows(
-              image: await gameRef.images.load('benzapilaa attack-Sheet.png'),
-              columns: 15,
-              rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 14)*/,
-      '/': await createAnimation(name: 'spear attack-Sheet.png', gameRef: gameRef, frames: 9)/*SpriteSheet.fromColumnsAndRows(
-              image: await gameRef.images.load('spear attack-Sheet.png'),
-              columns: 9,
-              rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 8)*/,
-      '+': await createAnimation(name: 'attack suriken-Sheet.png', gameRef: gameRef, frames: 10)/*SpriteSheet.fromColumnsAndRows(
-              image: await gameRef.images.load('attack suriken-Sheet.png'),
-              columns: 10,
-              rows: 1)
-          .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 9)*/,
+      '-': await createAnimation(
+          name: 'sword attack-Sheet.png', gameRef: gameRef, frames: 9),
+      '*': await createAnimation(
+          name: 'benzapilaa attack-Sheet.png', gameRef: gameRef, frames: 15),
+      '/': await createAnimation(
+          name: 'spear attack-Sheet.png', gameRef: gameRef, frames: 9),
+      '+': await createAnimation(
+          name: 'attack suriken-Sheet.png', gameRef: gameRef, frames: 10),
     };
-    /*animations = {
-      'idle': _idleAnimation,
-      'walk': _walkAnimation,
-      ...operationSymbolToAnimation
-    };*/
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 4;
     y = gameRef.size[1] / 2;
+    playerHitbox = PlayerHitbox(
+        isSolid: true,
+        anchor: Anchor.bottomCenter,
+        size: Vector2(32, 64),
+        position: Vector2(size.x / 2, size.y));
+    playerHitbox.debugColor = Colors.yellow;
+    add(playerHitbox);
     // TODO: implement onLoad
     return super.onLoad();
   }
 
   @override
   void update(double dt) {
+    playerHitbox.position = Vector2(size.x / 2, size.y);
+    print(size);
     if (dontShowArrows == true) {
       animation = _idleAnimation;
     } else {
@@ -153,9 +136,16 @@ class Player extends SpriteAnimationComponent with HasGameRef, CollisionCallback
           break;
       }
     }
-    /*width = animation!.frames[0].sprite.originalSize[0];
-    height = animation!.frames[0].sprite.originalSize[1];*/
     // TODO: implement update
     super.update(dt);
+  }
+}
+
+class PlayerHitbox extends RectangleHitbox{
+  PlayerHitbox({isSolid, position, anchor, size}) : super(isSolid: isSolid, position: position, anchor: anchor, size: size);
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, ShapeHitbox other) {
+    // TODO: implement onCollision
+    super.onCollision(intersectionPoints, other);
   }
 }

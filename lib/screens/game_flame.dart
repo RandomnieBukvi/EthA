@@ -29,6 +29,7 @@ class Play extends FlameGame with HasCollisionDetection{
 
   @override
   FutureOr<void> onLoad() async {
+    debugMode = true;
     cameraComponent = CameraComponent(world: world);
     addAll([cameraComponent, world]);
     _enemy = Enemy(player: _player, worldSize: _background.size);

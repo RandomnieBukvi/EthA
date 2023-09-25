@@ -20,17 +20,12 @@ class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
   late Vector2 worldSize;
   @override
   FutureOr<void> onLoad() async {
-    _idleAnimation = await createAnimation(name: 'monster stand-Sheet.png', gameRef: gameRef, frames: 12, loop: true)/*SpriteSheet.fromColumnsAndRows(
-            image: await gameRef.images.load('monster stand-Sheet.png'),
-            columns: 12,
-            rows: 1)
-        .createAnimation(row: 0, stepTime: 0.1, from: 0, to: 11)*/;
+    _idleAnimation = await createAnimation(name: 'monster stand-Sheet.png', gameRef: gameRef, frames: 12, loop: true);
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 1.5;
     y = gameRef.size[1] / 2;
     await add(RectangleHitbox(isSolid: true));
-    //worldSize = (parent!.parent as Play).worldSize;
     // TODO: implement onLoad
     return super.onLoad();
   }
@@ -72,6 +67,13 @@ class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
     print('Collision!!!!!!!!!!!!!!!!!!!!!!!!');
     // TODO: implement onCollision
     super.onCollisionStart(intersectionPoints, other);
+  }
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    print(other.runtimeType);
+    if(other is PlayerHitbox) print('Player got touched');
+    // TODO: implement onCollision
+    super.onCollision(intersectionPoints, other);
   }
   @override
   void onCollisionEnd(PositionComponent other) {
