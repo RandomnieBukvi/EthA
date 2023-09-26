@@ -24,7 +24,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
     animation = _idleAnimation;
     anchor = Anchor.bottomCenter;
     x = gameRef.size[0] / 1.5;
-    y = gameRef.size[1] / 2;
+    y = gameRef.size[1] / 2.1;
     await add(RectangleHitbox(isSolid: true));
     // TODO: implement onLoad
     return super.onLoad();
@@ -32,8 +32,9 @@ class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
 
   @override
   void update(double dt) {
-    isOnGround = position.y >= worldSize.y / 2;
+    isOnGround = position.y > worldSize.y / 2;
     if(isOnGround){
+      position.y = worldSize.y / 2;
       velosity = Vector2.zero();
       jumpDelay -= dt;
     }else{
@@ -64,20 +65,16 @@ class Enemy extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-    print('Collision!!!!!!!!!!!!!!!!!!!!!!!!');
     // TODO: implement onCollision
     super.onCollisionStart(intersectionPoints, other);
   }
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    print(other.runtimeType);
-    if(other is PlayerHitbox) print('Player got touched');
     // TODO: implement onCollision
     super.onCollision(intersectionPoints, other);
   }
   @override
   void onCollisionEnd(PositionComponent other) {
-    print('endddddddddddddjasflkjfjafjljfasdljfd');
     // TODO: implement onCollisionEnd
     super.onCollisionEnd(other);
   }

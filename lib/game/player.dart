@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flame/geometry.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_go/all_weapons.dart';
+import 'package:lets_go/game/enemy.dart';
 import 'package:lets_go/screens/game.dart';
 import 'package:lets_go/screens/game_flame.dart';
 
@@ -11,8 +14,7 @@ enum Direction { left, right, idle, none }
 
 bool isAttacking = false;
 
-class Player extends SpriteAnimationComponent
-    with HasGameRef, CollisionCallbacks {
+class Player extends SpriteAnimationComponent with HasGameRef {
   Player({this.sizeOfBackground});
   double speed = 120;
   Vector2? sizeOfBackground;
@@ -41,7 +43,13 @@ class Player extends SpriteAnimationComponent
         anim.loop = false;
         animation = anim;
         var animTicker = animationTicker;
+        if (weapons[element.wkey]?.onAnimationStart != null) {
+          weapons[element.wkey]!.onAnimationStart!(this);
+        }
         await animTicker?.completed.then((value) async {
+          if (weapons[element.wkey]?.onAnimationEnd != null) {
+            weapons[element.wkey]!.onAnimationEnd!(this);
+          }
           print("ANimATion played");
           animation = _idleAnimation;
           await Future.delayed(Duration(milliseconds: 100));
@@ -59,6 +67,9 @@ class Player extends SpriteAnimationComponent
     }
     doArrowsWork = true;
     direction = Direction.idle;
+    memory.forEach((element) {
+      if (element.index > index) element.index--;
+    });
   }
 
   @override
@@ -87,11 +98,8 @@ class Player extends SpriteAnimationComponent
     x = gameRef.size[0] / 4;
     y = gameRef.size[1] / 2;
     playerHitbox = PlayerHitbox(
-        isSolid: true,
-        anchor: Anchor.bottomCenter,
-        size: Vector2(32, 64),
-        position: Vector2(size.x / 2, size.y));
-    playerHitbox.debugColor = Colors.yellow;
+      playerSize: size,
+    );
     add(playerHitbox);
     // TODO: implement onLoad
     return super.onLoad();
@@ -100,7 +108,6 @@ class Player extends SpriteAnimationComponent
   @override
   void update(double dt) {
     playerHitbox.position = Vector2(size.x / 2, size.y);
-    print(size);
     if (dontShowArrows == true) {
       animation = _idleAnimation;
     } else {
@@ -141,11 +148,87 @@ class Player extends SpriteAnimationComponent
   }
 }
 
-class PlayerHitbox extends RectangleHitbox{
-  PlayerHitbox({isSolid, position, anchor, size}) : super(isSolid: isSolid, position: position, anchor: anchor, size: size);
+class PlayerHitbox extends RectangleHitbox {
+  PlayerHitbox({required Vector2 playerSize})
+      : super(
+            isSolid: true,
+            position: Vector2(playerSize.x / 2, playerSize.y),
+            anchor: Anchor.bottomCenter,
+            size: Vector2(32, 64));
+  @override
+  // TODO: implement debugColor
+  Color get debugColor => Colors.yellow;
   @override
   void onCollision(Set<Vector2> intersectionPoints, ShapeHitbox other) {
     // TODO: implement onCollision
     super.onCollision(intersectionPoints, other);
+  }
+}
+
+class MinusHitbox extends RectangleHitbox {
+  MinusHitbox({required Vector2 playerSize})
+      : super(
+            isSolid: true,
+            position: Vector2(playerSize.x / 2, playerSize.y),
+            anchor: Anchor.bottomLeft,
+            size: Vector2(64, playerSize.y));
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, ShapeHitbox other) {
+    if (other.parent is Enemy)
+      (other.parent as Enemy).velosity +=
+          Vector2((parent as Player).isTurnedRight ? 150 : -150, -100);
+    // TODO: implement onCollisionStart
+    super.onCollisionStart(intersectionPoints, other);
+  }
+}
+
+class Suriken extends SpriteComponent with HasGameRef, CollisionCallbacks {
+  Suriken({required Enemy this.enemy});
+  final Enemy enemy;
+  /*await world.add(Suriken()
+      ..scale = Vector2(2, 2)
+      ..anchor = Anchor.center
+      ..position = _enemy.position + Vector2(20, 0)
+      ..add(RotateEffect.by(
+          tau / 4,
+          EffectController(
+            duration: 0.2,
+            infinite: true,
+          ))));*/
+  @override
+  FutureOr<void> onLoad() async {
+    print('suriken added');
+    scale = Vector2.all(2);
+    anchor = Anchor.center;
+    add(RotateEffect.by(
+          tau / 4,
+          EffectController(
+            duration: 0.1,
+            infinite: true,
+          )));
+    sprite = await gameRef.loadSprite('suriken.png');
+    add(RectangleHitbox(isSolid: true));
+    add(MoveToEffect(enemy.position, EffectController(speed: 400),onComplete: () => removeFromParent(),));
+    // TODO: implement onLoad
+    return super.onLoad();
+  }
+  Vector2 ratio = Vector2.zero();
+  /*@override
+  void update(double dt) {
+    ratio = position - enemy.position;
+    position += Vector2(50 * ratio.x / ratio.y, 50 * ratio.y / ratio.x) * dt;
+    // TODO: implement update
+    super.update(dt);
+  }*/
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    print(other);
+    if (other is Enemy) {
+      print('safkjasjlfsdfadsfafsadfasdfadsfa');
+      removeFromParent();
+      }
+    // TODO: implement onCollisionStart
+    super.onCollisionStart(intersectionPoints, other);
   }
 }
