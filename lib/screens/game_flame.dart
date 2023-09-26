@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 //import 'package:flame/src/experimental/geometry/shapes/shape.dart';
 import 'package:lets_go/game/enemy.dart';
 import 'package:lets_go/game/player.dart';
@@ -29,7 +30,7 @@ class Play extends FlameGame with HasCollisionDetection{
 
   @override
   FutureOr<void> onLoad() async {
-    debugMode = true;
+    if(kDebugMode)  debugMode = true;
     cameraComponent = CameraComponent(world: world);
     addAll([cameraComponent, world]);
     _enemy = Enemy(player: _player, worldSize: _background.size);
